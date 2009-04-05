@@ -33,6 +33,7 @@ class BeanstalkSocket extends CakeSocket {
  * @access public
  */
 	var $description = 'Beanstalk DatasSource Interface';
+	var $_readBuffer = '';
 /**
  * Basic Configuration
  *
@@ -43,16 +44,9 @@ class BeanstalkSocket extends CakeSocket {
 					'persistent' => true,
 					'host' => '127.0.0.1',
 					'protocol' => 'tcp',
-					'port' => 11300
+					'port' => 11300,
 					'timeout' => 1,
 					);
-/**
- * The read buffer
- *
- * @var string
- * @access protected
- */
-	var $_readBuffer = '';
 /**
  * Writes a packet to the socket
  *
@@ -64,27 +58,31 @@ class BeanstalkSocket extends CakeSocket {
 		return $this->write($data . "\r\n");
 	}
 /**
- * Reads a packet from the socket using a buffer
+ * Reads a packet from the socket
  *
  * @param int $length Number of bytes to read
  * @access public
  * @return string|boolean Data or false on error
  */
-	function readPacket($length = 256) {
-		while ($data = $this->read($length)) {
-			$this->_readBuffer .= $data;
-
-			$position = strpos($this->_readBuffer, "\r\n");
-
-			if ($position === false) {
-				continue;
-			}
-			$packet = substr($this->_readBuffer, 0, $position);
-			$this->_readBuffer = substr($this->_readBuffer, $position + 2);
-
-			return $packet;
+	function readPacket($length = null) {
+		if (!$this->connected && !$this->connect()) {
+			return false;
 		}
-		return false;
+
+		if ($length) {
+			if (!$data = $this->read($length + 2)) {
+				return false;
+			}
+			$packet = rtrim($data, "\r\n");
+		} else {
+			$packet = stream_get_line($this->connection, 16384, "\r\n");
+		}
+
+//		var_dump('------------PACKET----------');
+//		var_dump($packet);
+//		var_dump('---------------------------');
+
+		return $packet;
 	}
 
 	/* Producer Commands */
@@ -104,8 +102,8 @@ class BeanstalkSocket extends CakeSocket {
  * @return integer|boolean False on error otherwise and integer indicating the job id
  */
 	function put($pri, $delay, $ttr, $data) {
-		$this->writePacket(sprintf('put %d %d %d %d', $priority, $delay, $ttr, strlen($body)));
-		$this->writePacket($body);
+		$this->writePacket(sprintf('put %d %d %d %d', $pri, $delay, $ttr, strlen($data)));
+		$this->writePacket($data);
 		$status = strtok($this->readPacket(), ' ');
 
 		switch ($status) {
@@ -115,7 +113,7 @@ class BeanstalkSocket extends CakeSocket {
 			case 'EXPECTED_CRLF':
 			case 'JOB_TOO_BIG':
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -129,7 +127,7 @@ class BeanstalkSocket extends CakeSocket {
  * @access public
  * @return string|boolean False on error otherwise the tube
  */
-	function use($tube) {
+	function choose($tube) {
 		$this->writePacket(sprintf('use %s', $tube));
 		$status = strtok($this->readPacket(), ' ');
 
@@ -137,9 +135,15 @@ class BeanstalkSocket extends CakeSocket {
 			case 'USING':
 				return strtok(' ');
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
+	}
+/**
+ * Alias for useTube
+ */
+	function useTube($tube) {
+		return $this->choose($tube);
 	}
 
 	/* Worker Commands */
@@ -162,13 +166,13 @@ class BeanstalkSocket extends CakeSocket {
 		switch ($status) {
 			case 'RESERVED':
 				return array(
-							'id' => $status,
+							'id' => (integer)strtok(' '),
 							'body' => $this->readPacket((integer)strtok(' '))
 							);
 			case 'DEADLINE_SOON':
 			case 'TIMED_OUT':
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -188,7 +192,7 @@ class BeanstalkSocket extends CakeSocket {
 				return true;
 			case 'NOT_FOUND':
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -211,7 +215,7 @@ class BeanstalkSocket extends CakeSocket {
 				return true;
 			case 'NOT_FOUND':
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -235,7 +239,7 @@ class BeanstalkSocket extends CakeSocket {
 				return true;
 			case 'NOT_FOUND':
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -255,7 +259,7 @@ class BeanstalkSocket extends CakeSocket {
 				return true;
 			case 'NOT_TOUCHED':
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -275,7 +279,7 @@ class BeanstalkSocket extends CakeSocket {
 			case 'WATCHING':
 				return (integer)strtok(' ');
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -295,7 +299,7 @@ class BeanstalkSocket extends CakeSocket {
 				return (integer)strtok(' ');
 			case 'NOT_IGNORED':
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -357,7 +361,7 @@ class BeanstalkSocket extends CakeSocket {
 				return $this->readPacket((integer)strtok(' '));
 			case 'NOT_FOUND':
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
 	}
@@ -379,9 +383,78 @@ class BeanstalkSocket extends CakeSocket {
 			case 'KICKED':
 				return (integer)strtok(' ');
 			default:
-				$this->setLastError($status);
+				$this->setLastError($status, '');
 				return false;
 		}
+	}
+
+	/* Stats Commands */
+
+/**
+ * Gives statistical information about the specified job if it exists
+ *
+ * @param integer $id The job id
+ * @access public
+ * @return string|boolean False on error otherwise a string with a yaml formatted dictionary
+ */
+	function statsJob($id) {
+	}
+/**
+ * Gives statistical information about the specified tube if it exists
+ *
+ * @param string $tube Name of the tube
+ * @access public
+ * @return string|boolean False on error otherwise a string with a yaml formatted dictionary
+ */
+	function statsTube($tube) {
+	}
+/**
+ * Gives statistical information about the system as a whole
+ *
+ * @access public
+ * @return string|boolean False on error otherwise a string with a yaml formatted dictionary
+ */
+	function stats() {
+		$this->writePacket('stats');
+		$status = strtok($this->readPacket(), ' ');
+
+		switch ($status) {
+			case 'OK':
+				return $this->readPacket((integer)strtok(' '));
+			default:
+				$this->setLastError($status, '');
+				return false;
+		}
+	}
+/**
+ * Returns a list of all existing tubes
+ *
+ * @access public
+ * @return string|boolean False on error otherwise a string with a yaml formatted list
+ */
+	function listTubes() {
+	}
+/**
+ * Returns the tube currently being used by the producer
+ *
+ * @access public
+ * @return string|boolean False on error otherwise a string with the name of the tube
+ */
+	function listTubeUsed() {
+	}
+/**
+ * Alias for listTubeUsed
+ */
+	function listTubeChosen() {
+		return $this->listTubeUsed();
+	}
+/**
+ * Returns a list of tubes currently being watched by the worker
+ *
+ * @access public
+ * @return string|boolean False on error otherwise a string with a yaml formatted list
+ */
+	function listTubesWatched() {
 	}
 }
 ?>
