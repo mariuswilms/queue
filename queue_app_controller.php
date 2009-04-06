@@ -1,6 +1,6 @@
 <?php
 /**
- * Job Model File
+ * Queue App Controller File
  *
  * Copyright (c) 2009 David Persson
  *
@@ -11,19 +11,17 @@
  * CakePHP version 1.2
  *
  * @package    queue
- * @subpackage queue.models
+ * @subpackage queue.controllers
  * @copyright  2009 David Persson <davidpersson@qeweurope.org>
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/queue
  */
 /**
- * Job Model Class
+ * Queue App Controller Class
  *
  * @package    queue
- * @subpackage queue.models
+ * @subpackage queue.controllers
  */
-class Job extends QueueAppModel {
-	var $useDbConfig = 'queue';
-	var $useTable = false;
+class QueueAppController extends AppController {
 }
 ?>

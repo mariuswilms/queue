@@ -14,7 +14,7 @@
  * @subpackage queue.vendors
  * @copyright  2009 David Persson <davidpersson@qeweurope.org>
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
- * @link       http://github.com/davidpersson/cakephp-queue
+ * @link       http://github.com/davidpersson/queue
  */
 App::import('Core', 'Socket');
 /**
@@ -24,6 +24,7 @@ App::import('Core', 'Socket');
  *
  * @package    queue
  * @subpackage queue.vendors
+ * @link       http://github.com/kr/beanstalkd
  */
 class BeanstalkSocket extends CakeSocket {
 /**

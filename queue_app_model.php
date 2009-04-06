@@ -1,6 +1,6 @@
 <?php
 /**
- * Job Model File
+ * Queue App Model File
  *
  * Copyright (c) 2009 David Persson
  *
@@ -17,13 +17,11 @@
  * @link       http://github.com/davidpersson/queue
  */
 /**
- * Job Model Class
+ * Queue App Model Class
  *
  * @package    queue
  * @subpackage queue.models
  */
-class Job extends QueueAppModel {
-	var $useDbConfig = 'queue';
-	var $useTable = false;
+class QueueAppModel extends AppModel {
 }
 ?>

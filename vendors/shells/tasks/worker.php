@@ -1,8 +1,8 @@
 <?php
 /**
- * Make Task File
+ * Worker Task File
  *
- * Copyright (c) 2007-2009 David Persson
+ * Copyright (c) 2009 David Persson
  *
  * Distributed under the terms of the MIT License.
  * Redistributions of files must retain the above copyright notice.
@@ -10,18 +10,18 @@
  * PHP version 5
  * CakePHP version 1.2
  *
- * @package    media
- * @subpackage media.shells.tasks
- * @copyright  2007-2009 David Persson <davidpersson@qeweurope.org>
+ * @package    queue
+ * @subpackage queue.shells.tasks
+ * @copyright  2009 David Persson <davidpersson@qeweurope.org>
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
- * @link       http://github.com/davidpersson/media
+ * @link       http://github.com/davidpersson/queue
  */
 Configure::write('debug', 2);
 /**
- * Make Task Class
+ * Worker Task Class
  *
- * @package    media
- * @subpackage media.shells.tasks
+ * @package    queue
+ * @subpackage queue.shells.tasks
  */
 class WorkerTask extends ManageShell {
 	var $uses = array('Queue.Job');

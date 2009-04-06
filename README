@@ -1,0 +1,30 @@
+
+  Q
+  U
+  E
+  U
+  E Plugin for CakePHP
+
+  Authors
+  -------
+  See the AUTHORS file.
+
+  Copyright & License
+  -------------------
+  Queue Plugin for CakePHP is Copyright (c) 2009 David Persson
+  if not otherwise stated. The code is distributed under the terms
+  of the MIT License. For the full license text see the LICENSE file.
+
+  Download
+  --------
+  Tar: http://github.com/davidpersson/queue/tarball/master
+  Zip: http://github.com/davidpersson/queue/zipball/master
+
+  Installation
+  ------------
+  Extract the downloaded archive.
+  Move or copy the extracted directory davidpersson-queue-[hash]
+  to /path/to/your/app/plugins/queue
+
+  For more information please visit the queue wiki at
+  http://github.com/davidpersson/queue/wikis
