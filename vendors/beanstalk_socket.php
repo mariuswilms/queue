@@ -34,7 +34,6 @@ class BeanstalkSocket extends CakeSocket {
  * @access public
  */
 	var $description = 'Beanstalk DatasSource Interface';
-	var $_readBuffer = '';
 /**
  * Basic Configuration
  *
@@ -78,11 +77,6 @@ class BeanstalkSocket extends CakeSocket {
 		} else {
 			$packet = stream_get_line($this->connection, 16384, "\r\n");
 		}
-
-//		var_dump('------------PACKET----------');
-//		var_dump($packet);
-//		var_dump('---------------------------');
-
 		return $packet;
 	}
 
@@ -141,7 +135,7 @@ class BeanstalkSocket extends CakeSocket {
 		}
 	}
 /**
- * Alias for useTube
+ * Alias for choose
  */
 	function useTube($tube) {
 		return $this->choose($tube);
