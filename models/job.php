@@ -23,7 +23,19 @@
  * @subpackage queue.models
  */
 class Job extends QueueAppModel {
+/**
+ * Database configuration to use
+ *
+ * @var string
+ * @access public
+ */
 	var $useDbConfig = 'queue';
+/**
+ * Tabel to use
+ *
+ * @var mixed
+ * @access public
+ */
 	var $useTable = false;
 }
 ?>

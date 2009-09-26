@@ -41,12 +41,12 @@ class BeanstalkSocket extends CakeSocket {
  * @access protected
  */
 	var $_baseConfig = array(
-					'persistent' => true,
-					'host' => '127.0.0.1',
-					'protocol' => 'tcp',
-					'port' => 11300,
-					'timeout' => 1,
-					);
+		'persistent' => true,
+		'host' => '127.0.0.1',
+		'protocol' => 'tcp',
+		'port' => 11300,
+		'timeout' => 1
+	);
 /**
  * Writes a packet to the socket
  *

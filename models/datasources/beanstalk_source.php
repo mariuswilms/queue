@@ -25,6 +25,12 @@ App::import('Vendor', 'Queue.BeanstalkSocket');
  * @subpackage queue.models.datasources
  */
 class BeanstalkSource extends DataSource {
+/**
+ * Holds ID of last inserted job
+ *
+ * @var mixed
+ * @access private
+ */
 	var $__insertID = null;
 /**
  * The default configuration of a specific DataSource
@@ -33,11 +39,11 @@ class BeanstalkSource extends DataSource {
  * @access public
  */
 	var $_baseConfig = array(
-					'host' => '127.0.0.1',
-					'port' => 11300,
-					'ttr' => 120,
-					'format' => 'php',
-					);
+		'host' => '127.0.0.1',
+		'port' => 11300,
+		'ttr' => 120,
+		'format' => 'php'
+	);
 
 	function __construct($config = array()) {
 		parent::__construct();
@@ -263,12 +269,12 @@ class BeanstalkSource extends DataSource {
 		$this->_queriesCnt++;
 		$this->_queriesTime += $this->took;
 		$this->_queriesLog[] = array(
-						'query' => $method,
-						'error' => $this->error,
-						'took' => $this->took,
-						'affected' => 0,
-						'numRows' => 0,
-						);
+			'query' => $method,
+			'error' => $this->error,
+			'took' => $this->took,
+			'affected' => 0,
+			'numRows' => 0
+		);
 	}
 
 	function showLog() {
