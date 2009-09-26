@@ -26,7 +26,8 @@ class StatisticsTask extends QueueShell {
 	var $uses = array('Queue.Job');
 
 	function execute() {
-		$this->heading('Statistics');
+		$this->out('Statistics');
+		$this->hr();
 		$this->out('Updating every 5 seconds');
 		$this->out('Press STRG+C to abort');
 

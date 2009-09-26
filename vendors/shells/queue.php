@@ -24,15 +24,7 @@ Configure::write('Cache.disable', true);
  * @subpackage queue.shells
  */
 class QueueShell extends Shell {
-	var $tasks = array('Worker', 'Producer', 'Statistics');
-	var $verbose = false;
-	var $quiet = false;
-/**
- * Width of shell in number of characters per line
- *
- * @var integer
- */
-	var $width = 80;
+	var $tasks = array('Producer', 'Statistics');
 /**
  * _welcome
  *
@@ -40,8 +32,8 @@ class QueueShell extends Shell {
  * @return void
  */
 	function _welcome() {
-		$this->clear();
-		$this->heading(__('Queue Plugin Manage Shell', true), null, '~');
+		$this->out('Queue Plugin Shell');
+		$this->hr();
 	}
 /**
  * main
@@ -50,23 +42,24 @@ class QueueShell extends Shell {
  * @return void
  */
 	function main() {
-		if (isset($this->params['verbose'])) {
-			$this->verbose = true;
-		}
-		if (isset($this->params['quiet'])) {
-			$this->quiet = true;
-		}
-
 		$this->out('[P]roducer');
 		$this->out('[W]orker');
 		$this->out('[S]tatistics');
 		$this->out('[H]elp');
 		$this->out('[Q]uit');
 
-		$action = strtoupper($this->in(__('What would you like to do?', true), array('W', 'P', 'S', 'H', 'Q'),'q'));
+		$action = strtoupper($this->in('What would you like to do?', array('W', 'P', 'S', 'H', 'Q'),'q'));
 		switch($action) {
 			case 'W':
-				$this->Worker->execute();
+				$name = $this->in('Please enter the name of the worker:', null, 'debug');
+				$name = Inflector::camelize($name) . 'Worker';
+
+				if (!isset($this->{$name})) {
+					$this->tasks[] = $name;
+					$this->loadTasks();
+					$this->{$name}->initialize();
+				}
+				$this->{$name}->execute();
 				break;
 			case 'P':
 				$this->Producer->execute();
@@ -111,178 +104,6 @@ class QueueShell extends Shell {
 		$this->out("\t<source> Absolute path to a file or directory.");
 		$this->out("\t<destination> Absolute path to a directory.");
 		$this->out();
-	}
-
-	/* Useful display methods */
-
-/**
- * Outputs to the stdout filehandle.
- *
- * Overridden to enable quiet mode
- *
- * @param string $string String to output.
- * @param boolean $newline If true, the outputs gets an added newline.
- * @access public
- */
-	function out($string = '', $newline = true) {
-		if ($this->quiet) {
-			return null;
-		}
-		$this->Dispatch->stdout($string, $newline);
-	}
-/**
- * clear
- *
- * @access public
- * @return void
- */
-	function clear() {
-		$this->out(chr(27).'[H'.chr(27).'[2J');
-	}
-/**
- * Returns a string padded to specified width
- *
- * @param string $string The string to pad
- * @param int $width Final length of string
- * @param string $character Character to be used for padding
- * @param string $align Alignment of $string. Either STR_PAD_LEFT, STR_PAD_BOTH or STR_PAD_RIGHT
- * @return string Padded string
- */
-	function pad($string, $width, $character = ' ', $type = STR_PAD_RIGHT) {
-		return str_pad($string, $width, $character, $type);
-	}
-/**
- * heading
- *
- * @param mixed $string
- * @param mixed $width
- * @param string $character
- * @access public
- * @return void
- */
-	function heading($string, $width = null, $character = '=') {
-		if (is_string($width)) {
-			$character = $width;
-			$width = null;
-		}
-		if ($width === null) {
-			$width = $this->width;
-		}
-		$this->out($this->pad($string . ' ', $width, $character));
-		$this->out();
-	}
-/**
- * Overridden
- *
- * @param string $character
- * @param mixed $width
- * @access public
- * @return void
- */
-	function hr($character = '-', $width = null) {
-		$this->out(str_repeat($character, $width === null ? $this->width : $width));
-	}
-/**
- * info
- *
- * @param mixed $message
- * @access public
- * @return void
- */
-	function info($message) {
-		if (!$this->verbose) {
-			return null;
-		}
-		$this->out(sprintf(__('Notice: %s', true), $message), true);
-	}
-/**
- * warn
- *
- * @param mixed $message
- * @access public
- * @return void
- * @link /usr/lib/portage/bin/isolated-functions.sh
- */
-	function warn($message) {
-		/* Until Dispatcher does not prepend Error: */
-		fwrite($this->Dispatch->stderr, sprintf(__('Warning: %s', true), $message)."\n");
-	}
-/**
- * Overridden
- *
- * Needed because ShellDispatcher prepends "Error:"
- *
- * @param mixed $message
- * @access public
- * @return void
- */
-	function err($message) 	{
-		fwrite($this->Dispatch->stderr, sprintf(__('Error: %s', true), $message)."\n");
-		$this->_stop(1);
-	}
-/**
- * begin
- *
- * @param mixed $message
- * @access public
- * @return void
- */
-	function begin($message) {
-		$this->out(sprintf('%s ... ', $message), false);
-	}
-/**
- * end
- *
- * @param mixed $result
- * @access public
- * @return void
- */
-	function end($result = null) {
-		if ($result == true) {
-			$message =  __('ok', true);
-		} elseif (empty($result)) {
-			$message = __('unknown', true);
-		} else {
-			$message = __('failed', true);
-		}
-		$this->out(sprintf('%s', $message));
-		return $result;
-	}
-/**
- * progress
- *
- * Start with progress(target value)
- * Update with progress(current value, text)
- *
- * @param mixed $value
- * @param mixed $text
- * @access public
- * @return void
- */
-	function progress($value, $text = null) {
-		static $target = 0;
-
-		if ($this->quiet) {
-			return null;
-		}
-
-		if ($text === null) {
-			$target = $value;
-		} else {
-			$out = sprintf('%\' 6.2f%% %s', ($value * 100) / $target, $text);
-			$this->out($out);
-		}
-	}
-/**
- * Overridden to allow Stop messages
- *
- * @param int $status
- * @access protected
- * @return void
- */
-	function _stop($status = 0) {
-		$this->out($status === 0 ? __('Quitting.', true) : __('Aborting.', true));
-		parent::_stop($status);
 	}
 }
 ?>

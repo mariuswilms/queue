@@ -29,7 +29,8 @@ class ProducerTask extends QueueShell {
 	var $tube = 'default';
 
 	function execute() {
-		$this->heading('Debug Producer');
+		$this->out('Debug Producer');
+		$this->hr();
 		$this->tube = $this->in('Tube to use', null, 'default');
 
 		while (true) {

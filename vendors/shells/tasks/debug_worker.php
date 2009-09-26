@@ -1,6 +1,6 @@
 <?php
 /**
- * Worker Task File
+ * Debug Worker Task File
  *
  * Copyright (c) 2009 David Persson
  *
@@ -18,27 +18,29 @@
  */
 Configure::write('debug', 2);
 /**
- * Worker Task Class
+ * Debug Worker Task Class
  *
  * @package    queue
  * @subpackage queue.shells.tasks
  */
-class WorkerTask extends QueueShell {
+class DebugWorkerTask extends QueueShell {
 	var $uses = array('Queue.Job');
 	var $tubes = array('default');
 
 	function execute() {
-		$this->heading('Debug Worker');
+		$this->out('Debug Worker');
+		$this->hr();
+
 		$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
 
 		while (true) {
-			$this->hr(':');
+			$this->hr();
 			$this->out('Waiting for a job... STRG+C to abort');
 			$job = $this->Job->reserve(array('tubes' => $this->tubes));
-			$this->out();
+			$this->out('');
 			$this->out('Got:');
 			$this->out(var_export($job, true));
-			$this->out();
+			$this->out('');
 			$this->out('[D]elete');
 			$this->out('[B]ury');
 			$this->out('[R]elease');
