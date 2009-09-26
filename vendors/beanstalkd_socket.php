@@ -1,6 +1,6 @@
 <?php
 /**
- * Beanstalk Socket File
+ * Beanstalkd Socket File
  *
  * Copyright (c) 2009 David Persson
  *
@@ -18,22 +18,22 @@
  */
 App::import('Core', 'Socket');
 /**
- * Beanstalk Socket Class
+ * Beanstalkd Socket Class
  *
- * Implements the Beanstalk Protocol Spec 1.2
+ * Implements the beanstalkd protocol spec 1.2
  *
  * @package    queue
  * @subpackage queue.vendors
  * @link       http://github.com/kr/beanstalkd
  */
-class BeanstalkSocket extends CakeSocket {
+class BeanstalkdSocket extends CakeSocket {
 /**
  * description
  *
  * @var string
  * @access public
  */
-	var $description = 'Beanstalk DatasSource Interface';
+	var $description = 'Beanstalkd DatasSource Interface';
 /**
  * Basic Configuration
  *

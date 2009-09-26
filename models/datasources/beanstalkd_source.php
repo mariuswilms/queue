@@ -1,6 +1,6 @@
 <?php
 /**
- * Beanstalk Source File
+ * Beanstalkd Source File
  *
  * Copyright (c) 2009 David Persson
  *
@@ -17,14 +17,14 @@
  * @link       http://github.com/davidpersson/queue
  */
 App::import('Core', 'DataSource');
-App::import('Vendor', 'Queue.BeanstalkSocket');
+App::import('Vendor', 'Queue.BeanstalkdSocket');
 /**
- * Beanstalk Source Class
+ * Beanstalkd Source Class
  *
  * @package    queue
  * @subpackage queue.models.datasources
  */
-class BeanstalkSource extends DataSource {
+class BeanstalkdSource extends DataSource {
 /**
  * Holds ID of last inserted job
  *
@@ -49,7 +49,7 @@ class BeanstalkSource extends DataSource {
 		parent::__construct();
 		$this->setConfig($config);
 		$this->fullDebug = Configure::read('debug') > 1;
-		$this->connection = new BeanstalkSocket($this->config);
+		$this->connection = new BeanstalkdSocket($this->config);
 		$this->connected =& $this->connection->connected;
 		$this->connect();
 	}
@@ -66,7 +66,7 @@ class BeanstalkSource extends DataSource {
 	function connect() {
 		if (!$this->connection->connect()) {
 			$error = $this->lastError();
-			trigger_error("BeanstalkSource - Could not connect. Error given was '{$error}'.", E_USER_WARNING);
+			trigger_error("BeanstalkdSource - Could not connect. Error given was '{$error}'.", E_USER_WARNING);
 			return false;
 		}
 		return true;
@@ -189,7 +189,7 @@ class BeanstalkSource extends DataSource {
 				$this->logQuery($method, $params);
 				return $result;
 			default:
-				trigger_error("BeanstalkSource::query - Unkown method {$method}.", E_USER_WARNING);
+				trigger_error("BeanstalkdSource::query - Unkown method {$method}.", E_USER_WARNING);
 				return false;
 		}
 	}
