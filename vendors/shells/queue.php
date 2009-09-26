@@ -1,6 +1,6 @@
 <?php
 /**
- * Manage Shell File
+ * Queue Shell File
  *
  * Copyright (c) 2009 David Persson
  *
@@ -23,7 +23,7 @@ Configure::write('Cache.disable', true);
  * @package    queue
  * @subpackage queue.shells
  */
-class ManageShell extends Shell {
+class QueueShell extends Shell {
 	var $tasks = array('Worker', 'Producer', 'Statistics');
 	var $verbose = false;
 	var $quiet = false;

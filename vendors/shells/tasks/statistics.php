@@ -22,7 +22,7 @@
  * @package    queue
  * @subpackage queue.shells.tasks
  */
-class StatisticsTask extends ManageShell {
+class StatisticsTask extends QueueShell {
 	var $uses = array('Queue.Job');
 
 	function execute() {

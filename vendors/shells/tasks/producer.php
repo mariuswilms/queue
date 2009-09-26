@@ -23,7 +23,7 @@ Configure::write('debug', 2);
  * @package    queue
  * @subpackage queue.shells.tasks
  */
-class ProducerTask extends ManageShell {
+class ProducerTask extends QueueShell {
 	var $uses = array('Queue.Job');
 	var $count = 0;
 	var $tube = 'default';
