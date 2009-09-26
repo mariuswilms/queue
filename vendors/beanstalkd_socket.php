@@ -16,7 +16,7 @@
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/queue
  */
-App::import('Core', 'Socket');
+App::import('Core', 'CakeSocket');
 /**
  * Beanstalkd Socket Class
  *
