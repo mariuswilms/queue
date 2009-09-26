@@ -42,6 +42,7 @@ class BeanstalkdSource extends DataSource {
 		'host' => '127.0.0.1',
 		'port' => 11300,
 		'ttr' => 120,
+		'kickBound' => 100,
 		'format' => 'php'
 	);
 
@@ -78,6 +79,7 @@ class BeanstalkdSource extends DataSource {
 
 	function put(&$Model, $data, $options = array()) {
 		$Model->set($data);
+		$body = $Model->data[$Model->alias];
 
 		$priority = 0;
 		$delay = 0;
@@ -88,7 +90,7 @@ class BeanstalkdSource extends DataSource {
 		if (!$this->choose($Model, $tube)) {
 			return false;
 		}
-		$id = $this->connection->put($priority, $delay, $ttr, $this->_encode($Model->data));
+		$id = $this->connection->put($priority, $delay, $ttr, $this->_encode($body));
 
 		if ($id !== false) {
 			$Model->setInsertId($id);
@@ -171,7 +173,7 @@ class BeanstalkdSource extends DataSource {
 		if (!is_array($options)) {
 			$options = array('bound' => $options);
 		}
-		$bound = 100;
+		$bound = $this->_config['kickBound'];
 		$tube = null;
 		extract($options, EXTR_OVERWRITE);
 
