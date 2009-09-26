@@ -31,7 +31,7 @@ class BeanstalkdSource extends DataSource {
  * @var mixed
  * @access private
  */
-	var $__insertID = null;
+	var $__insertID;
 /**
  * The default configuration of a specific DataSource
  *
@@ -104,16 +104,13 @@ class BeanstalkdSource extends DataSource {
 	}
 
 	function reserve(&$Model, $options = array()) {
-		$default = array(
-						'timeout' => null,
-						'tube' => null,
-						);
-		extract(array_merge($default, $options));
+		$timeout = null;
+		$tube = null;
+		extract($options, EXTR_OVERWRITE);
 
 		if ($tube && !$this->watch($Model, $tube)) {
 			return false;
 		}
-
 		if (!$result = $this->connection->reserve($timeout)) {
 			return false;
 		}
@@ -137,7 +134,6 @@ class BeanstalkdSource extends DataSource {
 		$id = null;
 		$priority = 0;
 		$delay = 0;
-
 		extract($options, EXTR_OVERWRITE);
 
 		if ($id === null) {
@@ -146,13 +142,25 @@ class BeanstalkdSource extends DataSource {
 		return $this->connection->release($id, $priority, $delay);
 	}
 
+	function touch(&$Model, $options = array()) {
+		if (!is_array($options)) {
+			$options = array('id' => $options);
+		}
+		$id = null;
+		extract($options, EXTR_OVERWRITE);
+
+		if ($id === null) {
+			$id = $Model->id;
+		}
+		return $this->connection->touch($id);
+	}
+
 	function bury(&$Model, $options = array()) {
 		if (!is_array($options)) {
 			$options = array('id' => $options);
 		}
 		$id = null;
 		$priority = 0;
-
 		extract($options, EXTR_OVERWRITE);
 
 		if ($id === null) {
@@ -161,18 +169,18 @@ class BeanstalkdSource extends DataSource {
 		return $this->connection->bury($id, $priority);
 	}
 
-	function touch(&$Model, $options = array()) {
+	function kick(&$Model, $options = array()) {
 		if (!is_array($options)) {
-			$options = array('id' => $options);
+			$options = array('bound' => $options);
 		}
-		$id = null;
-
+		$bound = 100;
+		$tube = null;
 		extract($options, EXTR_OVERWRITE);
 
-		if ($id === null) {
-			$id = $Model->id;
+		if ($tube && !$this->choose($Model, $tube)) {
+			return false;
 		}
-		return $this->connection->touch($id);
+		return $this->connection->kick($bound);
 	}
 
 	function statistics(&$Model) {
@@ -283,13 +291,7 @@ class BeanstalkdSource extends DataSource {
 	function describe($model) {
 		return null;
 	}
-/**
- * To-be-overridden in subclasses.
- *
- * @param unknown_type $model
- * @param unknown_type $key
- * @return unknown
- */
+
 	function resolveKey($model, $key) {
 		return $model->alias . $key;
 	}
