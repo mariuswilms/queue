@@ -12,7 +12,7 @@
  *
  * @package    queue
  * @subpackage queue.shells.tasks
- * @copyright  2009 David Persson <davidpersson@qeweurope.org>
+ * @copyright  2009 David Persson <davidpersson@gmx.de>
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/queue
  */
