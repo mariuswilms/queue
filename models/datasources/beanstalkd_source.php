@@ -146,6 +146,35 @@ class BeanstalkdSource extends DataSource {
 		return $this->connection->release($id, $priority, $delay);
 	}
 
+	function bury(&$Model, $options = array()) {
+		if (!is_array($options)) {
+			$options = array('id' => $options);
+		}
+		$id = null;
+		$priority = 0;
+
+		extract($options, EXTR_OVERWRITE);
+
+		if ($id === null) {
+			$id = $Model->id;
+		}
+		return $this->connection->bury($id, $priority);
+	}
+
+	function touch(&$Model, $options = array()) {
+		if (!is_array($options)) {
+			$options = array('id' => $options);
+		}
+		$id = null;
+
+		extract($options, EXTR_OVERWRITE);
+
+		if ($id === null) {
+			$id = $Model->id;
+		}
+		return $this->connection->touch($id);
+	}
+
 	function statistics(&$Model) {
 		return $this->connection->stats();
 	}
