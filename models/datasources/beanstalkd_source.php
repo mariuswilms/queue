@@ -114,8 +114,9 @@ class BeanstalkdSource extends DataSource {
 		if (!$result = $this->connection->reserve($timeout)) {
 			return false;
 		}
-		$result['body'] = $this->_decode($result['body']);
-		return $Model->set(array($Model->alias => $result));
+		$data = $this->_decode($result['body']);
+		$data['id'] = $result['id'];
+		return $Model->set(array($Model->alias => $data));
 	}
 
 	function watch(&$Model, $tube) {
