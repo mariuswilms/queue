@@ -36,7 +36,7 @@ class StatisticsTask extends QueueShell {
 			$this->out('Got:');
 			$this->out(var_export($result, true));
 			sleep(5);
-			$this->clear();
+			$this->hr();
 		}
 	}
 }
