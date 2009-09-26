@@ -31,6 +31,8 @@ class MediaWorkerTask extends QueueShell {
 		$this->out('Media Worker');
 		$this->hr();
 
+		$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
+
 		while (true) {
 			$this->hr();
 			$this->out('Waiting for a job... STRG+C to abort.');
@@ -41,7 +43,17 @@ class MediaWorkerTask extends QueueShell {
 			$this->out(var_export($job, true));
 			$this->out('');
 
-			$result = Media::make($file, $instructions);
+			extract($job['Job'], EXTR_OVERWRITE);
+			extract($process, EXTR_OVERWRITE);
+			$result = false;
+
+			if (!$Media = Media::make($file, $instructions)) {
+				$message  = "Failed to make version `{$version}` ";
+				$message .= "of file `{$file}`. ";
+				$this->err($message);
+			} else {
+				$result = $Media->store($directory . basename($file), $overwrite);
+			}
 
 			if ($result) {
 				$this->Job->delete();
