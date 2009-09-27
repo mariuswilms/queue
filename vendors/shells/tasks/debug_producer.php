@@ -1,6 +1,6 @@
 <?php
 /**
- * Producer Task File
+ * Debug Producer Task File
  *
  * Copyright (c) 2009 David Persson
  *
@@ -19,12 +19,12 @@
 Configure::write('debug', 2);
 
 /**
- * Producer Task Class
+ * Debug Producer Task Class
  *
  * @package    queue
  * @subpackage queue.shells.tasks
  */
-class ProducerTask extends QueueShell {
+class DebugProducerTask extends QueueShell {
 	var $uses = array('Queue.Job');
 	var $count = 0;
 	var $tube = 'default';

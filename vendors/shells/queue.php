@@ -25,7 +25,15 @@ Configure::write('Cache.disable', true);
  * @subpackage queue.shells
  */
 class QueueShell extends Shell {
-	var $tasks = array('Producer', 'Statistics');
+
+/**
+ * Tasks to load. Additional tasks are also loaded dynamically.
+ *
+ * @see main()
+ * @var string
+ * @access public
+ */
+	var $tasks = array('Statistics');
 
 /**
  * _welcome
@@ -54,8 +62,12 @@ class QueueShell extends Shell {
 		$action = strtoupper($this->in('What would you like to do?', array('W', 'P', 'S', 'H', 'Q'),'q'));
 		switch($action) {
 			case 'W':
-				$name = $this->in('Please enter the name of the worker:', null, 'debug');
-				$name = Inflector::camelize($name) . 'Worker';
+			case 'P':
+				$prompt = sprintf('Please enter the name of the %s:',
+					$action == 'W' ? 'worker' : 'producer'
+				);
+				$name = $this->in($prompt, null, 'debug');
+				$name = Inflector::camelize($name) . ($action == 'W' ? 'Worker' : 'Producer');
 
 				if (!isset($this->{$name})) {
 					$this->tasks[] = $name;
@@ -63,9 +75,6 @@ class QueueShell extends Shell {
 					$this->{$name}->initialize();
 				}
 				$this->{$name}->execute();
-				break;
-			case 'P':
-				$this->Producer->execute();
 				break;
 			case 'S':
 				$this->Statistics->execute();
@@ -86,28 +95,18 @@ class QueueShell extends Shell {
  */
 	function help() {
 		// 63 chars ===============================================================
-		$this->out('Checks if files in filesystem are in sync with records.');
+		$this->out('');
 		$this->hr();
-		$this->out('Usage: cake <params> media.manage <command> <args>');
+		$this->out('Usage: cake <params> queue <command> <args>');
 		$this->hr();
 		$this->out('Params:');
-		$this->out("\t-connection <name> Database connection to use.");
-		$this->out("\t-yes Always assumes 'y' as answer.");
-		$this->out("\t-filter <version> Restrict command to a specfic filter version (e.g. xxl).");
-		$this->out("\t-force Overwrite files if they exist.");
 		$this->out("\t-verbose");
 		$this->out("\t-quiet");
 		$this->out();
 		$this->out('Commands:');
 		$this->out("\n\thelp\n\t\tShows this help message.");
-		$this->out("\n\tsynchron <model>\n\t\tChecks if records and files are in sync.");
-		$this->out("\n\tmake <source> <destination>\n\t\tProcess a file or directory according to filters.");
-		$this->out();
-		$this->out('Args:');
-		$this->out("\t<model> Name of the Model to use.");
-		$this->out("\t<source> Absolute path to a file or directory.");
-		$this->out("\t<destination> Absolute path to a directory.");
-		$this->out();
+		$this->out("\n\tstatistics\n\t\tPrint statistics.");
+		$this->out('');
 	}
 }
 ?>
