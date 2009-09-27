@@ -64,9 +64,6 @@ class BeanstalkdSource extends DataSource {
 		if ($this->connected) {
 			$this->disconnect();
 		}
-		if ($this->fullDebug) {
-			$this->showLog();
-		}
 	}
 
 	function connect() {
@@ -330,33 +327,6 @@ class BeanstalkdSource extends DataSource {
 			'affected' => 0,
 			'numRows' => 0
 		);
-	}
-
-	function showLog() {
-		$text = __n('query', 'queries', $this->_queriesCnt, true);
-
-		if (PHP_SAPI !== 'cli') {
-			printf('<table class="cake-sql-log" id="cakeSqlLog_%s" summary="Cake SQL Log">',
-							uniqid());
-			printf('<caption>(%s) %d %s took %.4f ms</caption>',
-							$this->configKeyName, $this->_queriesCnt, $text, $this->_queriesTime);
-			printf("<thead>\n<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>\n</thead>\n<tbody>\n",
-							'Nr', 'Query', 'Error', 'Affected', 'Num. rows', 'Took (ms)');
-
-			foreach ($this->_queriesLog as $key => $value) {
-				printf('<tr><td>%d</td><td>%s</td><td>%s</td><td>%d</td><td>%.4f</td><td>%d</td></tr>',
-								$key + 1, $value['query'], $value['error'],
-								$value['affected'],	$value['numRows'], $value['took']);
-			}
-		} else {
-			printf('(%s) %d %s took %.4f ms' . "\n",
-							$this->configKeyName, $this->_queriesCnt, $text, $this->_queriesTime);
-
-			foreach ($this->_queriesLog as $key => $value) {
-				printf('%d %s %s %.4f ms' . "\n",
-								$key + 1, $value['query'], $value['error'], $value['took']);
-			}
-		}
 	}
 
 	function lastError() {
