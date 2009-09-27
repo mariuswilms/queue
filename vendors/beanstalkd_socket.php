@@ -48,7 +48,7 @@ class BeanstalkdSocket extends CakeSocket {
 		'host' => '127.0.0.1',
 		'protocol' => 'tcp',
 		'port' => 11300,
-		'timeout' => 1
+		'timeout' => false
 	);
 
 /**
