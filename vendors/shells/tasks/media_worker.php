@@ -40,6 +40,10 @@ class MediaWorkerTask extends QueueShell {
 			$job = $this->Job->reserve(array('tubes' => $this->tubes));
 			$this->out('');
 
+			if (!$job) {
+				$this->error('Error');
+			}
+
 			$this->out("Deriving media for job {$this->Job->id}.");
 			$this->out(var_export($job, true));
 			$this->out('');
