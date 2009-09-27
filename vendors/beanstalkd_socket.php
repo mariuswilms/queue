@@ -17,6 +17,7 @@
  * @link       http://github.com/davidpersson/queue
  */
 App::import('Core', 'CakeSocket');
+
 /**
  * Beanstalkd Socket Class
  *
@@ -27,6 +28,7 @@ App::import('Core', 'CakeSocket');
  * @link       http://github.com/kr/beanstalkd
  */
 class BeanstalkdSocket extends CakeSocket {
+
 /**
  * description
  *
@@ -34,6 +36,7 @@ class BeanstalkdSocket extends CakeSocket {
  * @access public
  */
 	var $description = 'Beanstalkd DatasSource Interface';
+
 /**
  * Basic Configuration
  *
@@ -47,6 +50,7 @@ class BeanstalkdSocket extends CakeSocket {
 		'port' => 11300,
 		'timeout' => 1
 	);
+
 /**
  * Writes a packet to the socket
  *
@@ -57,6 +61,7 @@ class BeanstalkdSocket extends CakeSocket {
 	function writePacket($data) {
 		return $this->write($data . "\r\n");
 	}
+
 /**
  * Reads a packet from the socket
  *
@@ -81,6 +86,7 @@ class BeanstalkdSocket extends CakeSocket {
 	}
 
 	/* Producer Commands */
+
 
 /**
  * The "put" command is for any process that wants to insert a job into the queue.
@@ -112,6 +118,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * The "use" command is for producers. Subsequent put commands will put jobs into
  * the tube specified by this command. If no use command has been issued, jobs
@@ -134,6 +141,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Alias for choose
  */
@@ -142,6 +150,7 @@ class BeanstalkdSocket extends CakeSocket {
 	}
 
 	/* Worker Commands */
+
 
 /**
  * Reserve a job (with a timeout)
@@ -171,6 +180,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Removes a job from the server entirely
  *
@@ -191,6 +201,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Puts a reserved job back into the ready queue
  *
@@ -214,6 +225,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Puts a job into the "buried" state
  *
@@ -238,6 +250,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Allows a worker to request more time to work on a job
  *
@@ -258,6 +271,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Adds the named tube to the watch list for the current
  * connection.
@@ -278,6 +292,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Remove the named tube from the watch list
  *
@@ -301,6 +316,7 @@ class BeanstalkdSocket extends CakeSocket {
 
 	/* Other Commands */
 
+
 /**
  * Inspect a job by id
  *
@@ -312,6 +328,7 @@ class BeanstalkdSocket extends CakeSocket {
 		$this->writePacket(sprintf('peek %d', $id));
 		return $this->_peekRead();
 	}
+
 /**
  * Inspect the next ready job
  *
@@ -322,6 +339,7 @@ class BeanstalkdSocket extends CakeSocket {
 		$this->writePacket('peek-ready');
 		return $this->_peekRead();
 	}
+
 /**
  * Inspect the job with the shortest delay left
  *
@@ -332,6 +350,7 @@ class BeanstalkdSocket extends CakeSocket {
 		$this->writePacket('peek-delayed');
 		return $this->_peekRead();
 	}
+
 /**
  * Inspect the next job in the list of buried jobs
  *
@@ -342,6 +361,7 @@ class BeanstalkdSocket extends CakeSocket {
 		$this->writePacket('peek-buried');
 		return $this->_peekRead();
 	}
+
 /**
  * Handles response for all peek methods
  *
@@ -360,6 +380,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Moves jobs into the ready queue (applies to the current tube)
  *
@@ -385,6 +406,7 @@ class BeanstalkdSocket extends CakeSocket {
 
 	/* Stats Commands */
 
+
 /**
  * Gives statistical information about the specified job if it exists
  *
@@ -394,6 +416,7 @@ class BeanstalkdSocket extends CakeSocket {
  */
 	function statsJob($id) {
 	}
+
 /**
  * Gives statistical information about the specified tube if it exists
  *
@@ -403,6 +426,7 @@ class BeanstalkdSocket extends CakeSocket {
  */
 	function statsTube($tube) {
 	}
+
 /**
  * Gives statistical information about the system as a whole
  *
@@ -421,6 +445,7 @@ class BeanstalkdSocket extends CakeSocket {
 				return false;
 		}
 	}
+
 /**
  * Returns a list of all existing tubes
  *
@@ -429,6 +454,7 @@ class BeanstalkdSocket extends CakeSocket {
  */
 	function listTubes() {
 	}
+
 /**
  * Returns the tube currently being used by the producer
  *
@@ -437,12 +463,14 @@ class BeanstalkdSocket extends CakeSocket {
  */
 	function listTubeUsed() {
 	}
+
 /**
  * Alias for listTubeUsed
  */
 	function listTubeChosen() {
 		return $this->listTubeUsed();
 	}
+
 /**
  * Returns a list of tubes currently being watched by the worker
  *

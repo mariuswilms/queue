@@ -18,6 +18,7 @@
  */
 App::import('Core', 'DataSource');
 App::import('Vendor', 'Queue.BeanstalkdSocket');
+
 /**
  * Beanstalkd Source Class
  *
@@ -25,6 +26,7 @@ App::import('Vendor', 'Queue.BeanstalkdSocket');
  * @subpackage queue.models.datasources
  */
 class BeanstalkdSource extends DataSource {
+
 /**
  * Holds ID of last inserted job
  *
@@ -32,6 +34,7 @@ class BeanstalkdSource extends DataSource {
  * @access private
  */
 	var $__insertID;
+
 /**
  * The default configuration of a specific DataSource
  *
@@ -231,6 +234,7 @@ class BeanstalkdSource extends DataSource {
 				return false;
 		}
 	}
+
 /**
  * To-be-overridden in subclasses.
  *
@@ -242,6 +246,7 @@ class BeanstalkdSource extends DataSource {
 	function create(&$model, $fields = null, $values = null) {
 		return false;
 	}
+
 /**
  * Finds a job
  *
@@ -252,6 +257,7 @@ class BeanstalkdSource extends DataSource {
 	function read(&$model, $queryData = array()) {
 		return false;
 	}
+
 /**
  * To-be-overridden in subclasses.
  *
@@ -263,6 +269,7 @@ class BeanstalkdSource extends DataSource {
 	function update(&$model, $fields = null, $values = null) {
 		return false;
 	}
+
 /**
  * Deletes a job
  *
@@ -275,6 +282,7 @@ class BeanstalkdSource extends DataSource {
 		}
 		return $this->connection->delete($id);
 	}
+
 /**
  * Caches/returns cached results for child instances
  *
@@ -283,6 +291,7 @@ class BeanstalkdSource extends DataSource {
 	function listSources($data = null) {
 		return array();
 	}
+
 /**
  * Returns a Model description (metadata) or null if none found.
  *
@@ -339,6 +348,7 @@ class BeanstalkdSource extends DataSource {
 	function lastError() {
 		return $this->connection->lastError();
 	}
+
 /**
  * Returns the ID generated from the previous INSERT operation.
  *

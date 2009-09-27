@@ -17,6 +17,7 @@
  * @link       http://github.com/davidpersson/queue
  */
 Configure::write('Cache.disable', true);
+
 /**
  * Manage Shell Class
  *
@@ -25,6 +26,7 @@ Configure::write('Cache.disable', true);
  */
 class QueueShell extends Shell {
 	var $tasks = array('Producer', 'Statistics');
+
 /**
  * _welcome
  *
@@ -35,6 +37,7 @@ class QueueShell extends Shell {
 		$this->out('Queue Plugin Shell');
 		$this->hr();
 	}
+
 /**
  * main
  *
@@ -75,6 +78,7 @@ class QueueShell extends Shell {
 		}
 		$this->main();
 	}
+
 /**
  * Displays help contents
  *

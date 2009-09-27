@@ -16,6 +16,7 @@
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/queue
  */
+
 /**
  * Job Model Class
  *
@@ -23,6 +24,7 @@
  * @subpackage queue.models
  */
 class Job extends QueueAppModel {
+
 /**
  * Database configuration to use
  *
@@ -30,6 +32,7 @@ class Job extends QueueAppModel {
  * @access public
  */
 	var $useDbConfig = 'queue';
+
 /**
  * Tabel to use
  *

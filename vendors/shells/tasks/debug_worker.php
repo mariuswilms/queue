@@ -17,6 +17,7 @@
  * @link       http://github.com/davidpersson/queue
  */
 Configure::write('debug', 2);
+
 /**
  * Debug Worker Task Class
  *

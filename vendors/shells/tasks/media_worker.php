@@ -17,6 +17,7 @@
  * @link       http://github.com/davidpersson/queue
  */
 App::import('Vendor', 'Media.Media');
+
 /**
  * Media Worker Task Class
  *
