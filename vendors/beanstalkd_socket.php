@@ -161,9 +161,9 @@ class BeanstalkdSocket extends CakeSocket {
 		switch ($status) {
 			case 'RESERVED':
 				return array(
-							'id' => (integer)strtok(' '),
-							'body' => $this->readPacket((integer)strtok(' '))
-							);
+					'id' => (integer)strtok(' '),
+					'body' => $this->readPacket((integer)strtok(' '))
+				);
 			case 'DEADLINE_SOON':
 			case 'TIMED_OUT':
 			default:
