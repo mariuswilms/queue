@@ -32,7 +32,14 @@ class DebugProducerTask extends QueueShell {
 	function execute() {
 		$this->out('Debug Producer');
 		$this->hr();
-		$this->tube = $this->in('Tube to use', null, 'default');
+
+		$tube = 'default';
+
+		if ($this->args) {
+			$tubes = array_shift($this->args);
+			$this->interactive = false;
+		}
+		$this->tube = $this->in('Tube to use', null, $tube);
 
 		while (true) {
 			$this->count++;

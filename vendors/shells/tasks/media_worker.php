@@ -32,7 +32,13 @@ class MediaWorkerTask extends QueueShell {
 		$this->out('Media Worker');
 		$this->hr();
 
-		$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
+		$tubes = 'default';
+
+		if ($this->args) {
+			$tubes = array_shift($this->args);
+			$this->interactive = false;
+		}
+		$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, $tubes));
 
 		while (true) {
 			$this->hr();
@@ -41,7 +47,7 @@ class MediaWorkerTask extends QueueShell {
 			$this->out('');
 
 			if (!$job) {
-				$this->error('Error');
+				$this->error('Invalid Job');
 			}
 
 			$this->out("Deriving media for job {$this->Job->id}.");

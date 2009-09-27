@@ -53,6 +53,15 @@ class QueueShell extends Shell {
  * @return void
  */
 	function main() {
+		if ($this->args) {
+			$worker = strpos($this->args[0], '_worker') !== false;
+			$producer = strpos($this->args[0], '_producer') !== false;
+
+			if ($worker || $producer) {
+				return $this->_executeTask(array_shift($this->args));
+			}
+		}
+
 		$this->out('[P]roducer');
 		$this->out('[W]orker');
 		$this->out('[S]tatistics');
@@ -67,14 +76,7 @@ class QueueShell extends Shell {
 					$action == 'W' ? 'worker' : 'producer'
 				);
 				$name = $this->in($prompt, null, 'debug');
-				$name = Inflector::camelize($name) . ($action == 'W' ? 'Worker' : 'Producer');
-
-				if (!isset($this->{$name})) {
-					$this->tasks[] = $name;
-					$this->loadTasks();
-					$this->{$name}->initialize();
-				}
-				$this->{$name}->execute();
+				$this->_executeTask($name . ($action == 'W' ? '_worker' : '_producer'));
 				break;
 			case 'S':
 				$this->Statistics->execute();
@@ -88,6 +90,17 @@ class QueueShell extends Shell {
 		$this->main();
 	}
 
+	function _executeTask($name) {
+		$name = Inflector::camelize($name);
+
+		if (!isset($this->{$name})) {
+			$this->tasks[] = $name;
+			$this->loadTasks();
+			$this->{$name}->initialize();
+		}
+		return $this->{$name}->execute();
+	}
+
 /**
  * Displays help contents
  *
@@ -99,13 +112,20 @@ class QueueShell extends Shell {
 		$this->hr();
 		$this->out('Usage: cake <params> queue <command> <args>');
 		$this->hr();
-		$this->out('Params:');
+		$this->out('Parameters:');
 		$this->out("\t-verbose");
 		$this->out("\t-quiet");
-		$this->out();
+		$this->out('');
 		$this->out('Commands:');
 		$this->out("\n\thelp\n\t\tShows this help message.");
+		$this->out("\n\debug_producer <tube>\n\t\tStart debug producer.");
+		$this->out("\n\debug_worker <tubes>\n\t\tStart debug worker.");
+		$this->out("\n\media_worker <tubes>\n\t\tStart media worker.");
 		$this->out("\n\tstatistics\n\t\tPrint statistics.");
+		$this->out('');
+		$this->out('Arguments:');
+		$this->out("\t<tube>\n\t\tTubes to use.");
+		$this->out("\t<tubes>\n\t\tComma separated list of tubes to watch.");
 		$this->out('');
 	}
 }
