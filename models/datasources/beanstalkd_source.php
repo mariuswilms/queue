@@ -30,10 +30,13 @@ class BeanstalkdSource extends DataSource {
 /**
  * Holds ID of last inserted job
  *
+ * Works analog to {@see Model::__insertID}.
+ *
  * @var mixed
  * @access private
  */
 	var $__insertID;
+
 
 /**
  * The default configuration of a specific DataSource
@@ -289,7 +292,7 @@ class BeanstalkdSource extends DataSource {
  * @return array
  */
 	function listSources($data = null) {
-		return array();
+		return array('jobs');
 	}
 
 /**

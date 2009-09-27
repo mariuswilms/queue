@@ -32,13 +32,5 @@ class Job extends QueueAppModel {
  * @access public
  */
 	var $useDbConfig = 'queue';
-
-/**
- * Tabel to use
- *
- * @var mixed
- * @access public
- */
-	var $useTable = false;
 }
 ?>
