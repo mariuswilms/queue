@@ -37,7 +37,6 @@ class BeanstalkdSource extends DataSource {
  */
 	var $__insertID;
 
-
 /**
  * The default configuration of a specific DataSource
  *
@@ -190,6 +189,19 @@ class BeanstalkdSource extends DataSource {
 		return $this->connection->kick($bound);
 	}
 
+	function peek(&$Model, $options = array()) {
+		if (!is_array($options)) {
+			$options = array('id' => $options);
+		}
+		$id = null;
+		extract($options, EXTR_OVERWRITE);
+
+		if ($id === null) {
+			$id = $Model->id;
+		}
+		return $this->connection->peek($id);
+	}
+
 	function statistics(&$Model) {
 		return $this->connection->stats();
 	}
@@ -214,18 +226,31 @@ class BeanstalkdSource extends DataSource {
 		}
 	}
 
+/**
+ * All calls to methods on the model are routed through this method
+ *
+ * @param mixed $method
+ * @param mixed $params
+ * @param mixed $Model
+ * @access public
+ * @return void
+ */
 	function query($method, $params, &$Model) {
 		array_unshift($params, $Model);
 
 		$startQuery = microtime(true);
 
 		switch ($method) {
+			case 'put':
+			case 'choose':
+			case 'reserve':
+			case 'watch':
 			case 'release':
 			case 'delete':
 			case 'touch':
 			case 'bury':
-			case 'put':
-			case 'reserve':
+			case 'kick':
+			case 'peek':
 			case 'statistics':
 				$result = $this->dispatchMethod($method, $params);
 				$this->took = microtime(true) - $startQuery;
@@ -238,38 +263,20 @@ class BeanstalkdSource extends DataSource {
 		}
 	}
 
-/**
- * To-be-overridden in subclasses.
- *
- * @param unknown_type $model
- * @param unknown_type $fields
- * @param unknown_type $values
- * @return unknown
- */
-	function create(&$model, $fields = null, $values = null) {
+	function create(&$Model, $fields = null, $values = null) {
 		return false;
 	}
 
-/**
- * Finds a job
- *
- * @param unknown_type $model
- * @param unknown_type $queryData
- * @return unknown
- */
-	function read(&$model, $queryData = array()) {
+	function read(&$Model, $queryData = array()) {
+		if ($queryData['fields'] == 'count') {
+			if ($this->peek($Model, $queryData['conditions']['Job.id'])) {
+				return array(0 => array(0 => array('count' => 1)));
+			}
+		}
 		return false;
 	}
 
-/**
- * To-be-overridden in subclasses.
- *
- * @param unknown_type $model
- * @param unknown_type $fields
- * @param unknown_type $values
- * @return unknown
- */
-	function update(&$model, $fields = null, $values = null) {
+	function update(&$Model, $fields = null, $values = null) {
 		return false;
 	}
 
@@ -287,26 +294,30 @@ class BeanstalkdSource extends DataSource {
 	}
 
 /**
- * Caches/returns cached results for child instances
+ * Returns a data source specific expression
  *
+ * @see Model::delete, Model::exists, Model::_findCount
+ * @param mixed $model
+ * @param mixed $function I.e. `'count'`
+ * @param array $params
+ * @access public
+ * @return void
+ */
+	function calculate(&$Model, $function, $params = array()) {
+		return $function;
+	}
+
+/**
+ * Returns available sources
+ *
+ * @see Mode::useTable
  * @return array
  */
 	function listSources($data = null) {
 		return array('jobs');
 	}
 
-/**
- * Returns a Model description (metadata) or null if none found.
- *
- * @param Model $model
- * @return mixed
- */
 	function describe($model) {
-		return null;
-	}
-
-	function resolveKey($model, $key) {
-		return $model->alias . $key;
 	}
 
 	function logQuery($method, $params) {
@@ -355,8 +366,10 @@ class BeanstalkdSource extends DataSource {
 /**
  * Returns the ID generated from the previous INSERT operation.
  *
+ * Neeed as as workaround for beanstalkd's missing last insert id support.
+ *
  * @param unknown_type $source
- * @return in
+ * @return integer
  */
 	function lastInsertId($source = null) {
 		return $this->__insertID;
