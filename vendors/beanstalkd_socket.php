@@ -87,7 +87,6 @@ class BeanstalkdSocket extends CakeSocket {
 
 	/* Producer Commands */
 
-
 /**
  * The "put" command is for any process that wants to insert a job into the queue.
  *
@@ -150,7 +149,6 @@ class BeanstalkdSocket extends CakeSocket {
 	}
 
 	/* Worker Commands */
-
 
 /**
  * Reserve a job (with a timeout)
@@ -316,7 +314,6 @@ class BeanstalkdSocket extends CakeSocket {
 
 	/* Other Commands */
 
-
 /**
  * Inspect a job by id
  *
@@ -373,6 +370,7 @@ class BeanstalkdSocket extends CakeSocket {
 
 		switch ($status) {
 			case 'FOUND':
+				$id = (integer)strtok(' ');
 				return $this->readPacket((integer)strtok(' '));
 			case 'NOT_FOUND':
 			default:
@@ -405,7 +403,6 @@ class BeanstalkdSocket extends CakeSocket {
 	}
 
 	/* Stats Commands */
-
 
 /**
  * Gives statistical information about the specified job if it exists
