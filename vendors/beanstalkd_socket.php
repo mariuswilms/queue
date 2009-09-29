@@ -48,8 +48,32 @@ class BeanstalkdSocket extends CakeSocket {
 		'host' => '127.0.0.1',
 		'protocol' => 'tcp',
 		'port' => 11300,
-		'timeout' => false
+		'timeout' => 1
 	);
+
+/**
+ * Overridden to allow for a connection without a timeout and to only control socket timeout.
+ *
+ * @access public
+ * @return boolean
+ */
+	function connect() {
+		if (isset($this->connection)) {
+			$this->disconnect();
+		}
+		$function = $this->config['persistent'] ? 'psockfopen' : 'fsockopen';
+		$params = array($this->config['host'], &$errNum, &$errStr);
+
+		if ($this->config['timeout']) {
+			$params[] = $this->config['timeout'];
+		}
+		$this->connection = call_user_func_array($function, $params);
+
+		if (!empty($errNum) || !empty($errStr)) {
+			$this->setLastError($errNum, $errStr);
+		}
+		return $this->connected = is_resource($this->connection);
+	}
 
 /**
  * Writes a packet to the socket
