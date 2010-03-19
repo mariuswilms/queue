@@ -62,7 +62,7 @@ class BeanstalkdSocket extends CakeSocket {
 			$this->disconnect();
 		}
 		$function = $this->config['persistent'] ? 'pfsockopen' : 'fsockopen';
-		$params = array($this->config['host'], &$errNum, &$errStr);
+		$params = array($this->config['host'], $this->config['port'], &$errNum, &$errStr);
 
 		if ($this->config['timeout']) {
 			$params[] = $this->config['timeout'];
