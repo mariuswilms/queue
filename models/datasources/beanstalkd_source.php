@@ -17,7 +17,7 @@
  * @link       http://github.com/davidpersson/queue
  */
 App::import('Core', 'DataSource');
-App::import('Vendor', 'Queue.BeanstalkdSocket');
+App::import('Lib', 'Queue.BeanstalkdSocket');
 
 /**
  * Beanstalkd Source Class
@@ -330,7 +330,7 @@ class BeanstalkdSource extends DataSource {
 	}
 
 	function lastError() {
-		return $this->connection->lastError();
+		return array_pop($this->connection->errors());
 	}
 
 /**
