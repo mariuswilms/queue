@@ -25,34 +25,63 @@ App::import('Vendor', 'Media.Media');
  * @subpackage queue.shells.tasks
  */
 class MediaWorkerTask extends QueueShell {
+
+	var $description = 'Media Worker';
+
 	var $uses = array('Queue.Job');
+
 	var $tubes = array('default');
 
-	function execute() {
-		$this->out('Media Worker');
-		$this->hr();
+	var $verbose = false;
 
-		$tubes = 'default';
+	function execute() {
+		$this->verbose = isset($this->params['verbose']);
+
+		if (isset($this->params['description'])) {
+			$this->description = $this->params['description'];
+		}
+
+		$this->log('debug', 'Starting up.');
+		$this->out($this->description);
+		$this->hr();
 
 		if ($this->args) {
 			$tubes = array_shift($this->args);
 			$this->interactive = false;
 		}
-		$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, $tubes));
+		$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
 
 		while (true) {
 			$this->hr();
-			$this->out('Waiting for a job... STRG+C to abort.');
+			$message = 'Watching tubes ' . implode(', ', $this->tubes) . '.';
+			$this->log('debug', $message);
+			$this->out($message);
+
+			$message = 'Waiting for job...';
+			$this->log('debug', $message);
+			$this->out("{$message} STRG+C to abort.");
+
 			$job = $this->Job->reserve(array('tubes' => $this->tubes));
 			$this->out('');
 
 			if (!$job) {
-				$this->error('Invalid Job');
+				$message = 'Got invalid job.';
+				$this->log('error', $message);
+				$this->error($message);
+				continue;
+			}
+			$message = "Got job `{$this->Job->id}`.";
+			$this->log('debug', $message);
+			$this->out($message);
+
+			if ($this->verbose) {
+				$this->out(var_export($job, true));
+				$this->out('');
 			}
 
-			$this->out("Deriving media for job {$this->Job->id}.");
-			$this->out(var_export($job, true));
-			$this->out('');
+			$message = "Deriving media for job `{$this->Job->id}`...";
+			$this->log('debug', $message);
+			$this->out($message);
 
 			extract($job['Job'], EXTR_OVERWRITE);
 			extract($process, EXTR_OVERWRITE);
@@ -60,19 +89,34 @@ class MediaWorkerTask extends QueueShell {
 
 			if (!$Media = Media::make($file, $instructions)) {
 				$message  = "Failed to make version `{$version}` ";
-				$message .= "of file `{$file}`. ";
+				$message .= "of file `{$file}` part of job `{$this->Job->id}`. ";
+				$this->log('error', $message);
 				$this->err($message);
 			} else {
 				$result = $Media->store($directory . basename($file), $overwrite);
 			}
-
 			if ($result) {
 				$this->Job->delete();
-				$this->out("OK. Job {$this->Job->id} deleted.");
+
+				$message = "Job `{$this->Job->id}` deleted.";
+				$this->log('debug', $message);
+				$this->out("OK. {$message}");
 			} else {
 				$this->Job->bury();
-				$this->err("FAILED. Job {$this->Job->id} buried.");
+
+				$message = "Job `{$this->Job->id}` buried.";
+				$this->log('debug', $message);
+				$this->out("FAILED. {$message}");
 			}
 		}
+		$this->log('debug', 'Exiting.');
 	}
+
+	function log($type, $message) {
+		$message = "{$this->description} - {$message}";
+		return $this->log($type, $message);
+	}
+
 }
+
+?>
