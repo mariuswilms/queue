@@ -180,7 +180,7 @@ class BeanstalkdSource extends DataSource {
 		if (!is_array($options)) {
 			$options = array('bound' => $options);
 		}
-		$bound = $this->_config['kickBound'];
+		$bound = $this->config['kickBound'];
 		$tube = null;
 		extract($options, EXTR_OVERWRITE);
 
