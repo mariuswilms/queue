@@ -53,6 +53,14 @@ class BeanstalkdSocket {
 	}
 
 	/**
+	 * Destructor, used to disconnect from current connection.
+	 *
+	 */
+	public function __destruct() {
+		$this->disconnect();
+	}
+
+	/**
 	 * Creates a connection.
 	 *
 	 * @return boolean
@@ -73,7 +81,31 @@ class BeanstalkdSocket {
 		if (!empty($errNum) || !empty($errStr)) {
 			$this->_errors[] = "{$errNum}: {$errStr}";
 		}
-		return $this->connected = is_resource($this->_connection);
+
+		$this->connected = is_resource($this->_connection);
+
+		if ($this->connected) {
+			stream_set_timeout($this->_connection, -1); // no timeout when reading from the socket
+		}
+		return $this->connected;
+	}
+
+	/**
+	 * Disconnect the socket from the current connection.
+	 *
+	 * @return boolean Success
+	 */
+	public function disconnect() {
+		if (!is_resource($this->_connection)) {
+			$this->connected = false;
+		} else {
+			$this->connected = !fclose($this->_connection);
+
+			if (!$this->connected) {
+				$this->_connection = null;
+			}
+		}
+		return !$this->connected;
 	}
 
 	public function errors() {
@@ -105,7 +137,6 @@ class BeanstalkdSocket {
 		if (!$this->connected && !$this->connect()) {
 			return false;
 		}
-
 		if ($length) {
 			if (feof($this->_connection)) {
 				return false;
