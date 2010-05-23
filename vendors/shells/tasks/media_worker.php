@@ -41,7 +41,7 @@ class MediaWorkerTask extends QueueShell {
 			$this->description = $this->params['description'];
 		}
 
-		$this->log('debug', 'Starting up.');
+		$this->log('Starting up.', 'debug');
 		$this->out($this->description);
 		$this->hr();
 
@@ -54,11 +54,11 @@ class MediaWorkerTask extends QueueShell {
 		while (true) {
 			$this->hr();
 			$message = 'Watching tubes ' . implode(', ', $this->tubes) . '.';
-			$this->log('debug', $message);
+			$this->log($message, 'debug');
 			$this->out($message);
 
 			$message = 'Waiting for job...';
-			$this->log('debug', $message);
+			$this->log($message, 'debug');
 			$this->out("{$message} STRG+C to abort.");
 
 			$job = $this->Job->reserve(array('tubes' => $this->tubes));
@@ -66,12 +66,12 @@ class MediaWorkerTask extends QueueShell {
 
 			if (!$job) {
 				$message = 'Got invalid job.';
-				$this->log('error', $message);
+				$this->log($message, 'error');
 				$this->error($message);
 				continue;
 			}
 			$message = "Got job `{$this->Job->id}`.";
-			$this->log('debug', $message);
+			$this->log($message, 'debug');
 			$this->out($message);
 
 			if ($this->verbose) {
@@ -80,41 +80,52 @@ class MediaWorkerTask extends QueueShell {
 			}
 
 			$message = "Deriving media for job `{$this->Job->id}`...";
-			$this->log('debug', $message);
+			$this->log($message, 'debug');
 			$this->out($message);
 
 			extract($job['Job'], EXTR_OVERWRITE);
 			extract($process, EXTR_OVERWRITE);
 			$result = false;
 
-			if (!$Media = Media::make($file, $instructions)) {
+			$Media = Media::make($file, $instructions);
+			if ($Media) {
+				$Folder = new Folder($directory, true, 0777);
+				$result = $Media->store($directory . basename($file), $overwrite);
+
+				if (!$result) {
+					$message  = "Failed to store version `{$version}` ";
+					$message .= "of file `{$file}` part of job `{$this->Job->id}`. ";
+					$this->log($message, 'error');
+					$this->err($message);
+				}
+			} else {
 				$message  = "Failed to make version `{$version}` ";
 				$message .= "of file `{$file}` part of job `{$this->Job->id}`. ";
-				$this->log('error', $message);
+				$this->log($message, 'error');
 				$this->err($message);
-			} else {
-				$result = $Media->store($directory . basename($file), $overwrite);
 			}
+
 			if ($result) {
+				$message = "Job `{$this->Job->id}` deleted."; // id is unset after delete
+
 				$this->Job->delete();
 
-				$message = "Job `{$this->Job->id}` deleted.";
-				$this->log('debug', $message);
+				$this->log($message, 'debug');
 				$this->out("OK. {$message}");
 			} else {
 				$this->Job->bury();
 
 				$message = "Job `{$this->Job->id}` buried.";
-				$this->log('debug', $message);
+				$this->log($message, 'error');
 				$this->out("FAILED. {$message}");
 			}
 		}
-		$this->log('debug', 'Exiting.');
+		$this->log('Exiting.', 'debug');
 	}
 
-	function log($type, $message) {
+	function log($message, $type = 'debug') {
 		$message = "{$this->description} - {$message}";
-		return $this->log($type, $message);
+		return parent::log($message, $type);
 	}
 
 }
