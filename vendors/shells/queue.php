@@ -33,7 +33,7 @@ class QueueShell extends Shell {
  * @var string
  * @access public
  */
-	var $tasks = array('Statistics');
+	var $tasks = array('Statistics', 'Admin');
 
 /**
  * _welcome
@@ -64,11 +64,12 @@ class QueueShell extends Shell {
 
 		$this->out('[P]roducer');
 		$this->out('[W]orker');
+		$this->out('[A]dmin');
 		$this->out('[S]tatistics');
 		$this->out('[H]elp');
 		$this->out('[Q]uit');
 
-		$action = strtoupper($this->in('What would you like to do?', array('W', 'P', 'S', 'H', 'Q'),'q'));
+		$action = strtoupper($this->in('What would you like to do?', array('W', 'P', 'S', 'A', 'H', 'Q'),'q'));
 		switch($action) {
 			case 'W':
 			case 'P':
@@ -83,6 +84,9 @@ class QueueShell extends Shell {
 				break;
 			case 'H':
 				$this->help();
+				break;
+			case 'A':
+				$this->Admin->execute();
 				break;
 			case 'Q':
 				$this->_stop();
