@@ -47,7 +47,7 @@ class BeanstalkdSocket {
 			'persistent' => true, // the FAQ recommends persistent connections
 			'host' => '127.0.0.1',
 			'port' => 11300,
-			'timeout' => 1 // the timeout on the whole socket
+			'timeout' => 1 // the timeout when connecting to the server
 		);
 		$this->_config = $defaults + $config;
 	}
