@@ -61,7 +61,7 @@ class MediaWorkerTask extends QueueShell {
 			$this->log($message, 'debug');
 			$this->out("{$message} STRG+C to abort.");
 
-			$job = $this->Job->reserve(array('tubes' => $this->tubes));
+			$job = $this->Job->reserve(array('tube' => $this->tubes));
 			$this->out('');
 
 			if (!$job) {
