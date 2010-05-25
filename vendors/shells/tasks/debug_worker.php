@@ -43,7 +43,7 @@ class DebugWorkerTask extends QueueShell {
 		while (true) {
 			$this->hr();
 			$this->out('Waiting for a job... STRG+C to abort');
-			$job = $this->Job->reserve(array('tubes' => $this->tubes));
+			$job = $this->Job->reserve(array('tube' => $this->tubes));
 			$this->out('');
 			$this->out('Got:');
 			$this->out(var_export($job, true));
