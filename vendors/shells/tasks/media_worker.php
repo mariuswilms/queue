@@ -16,7 +16,6 @@
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/queue
  */
-App::import('Lib', 'Media.Media');
 
 /**
  * Media Worker Task Class
@@ -30,9 +29,11 @@ class MediaWorkerTask extends QueueShell {
 
 	var $uses = array('Queue.Job');
 
-	var $tubes = array('default');
+	var $tubes;
 
 	var $verbose = false;
+
+	var $model;
 
 	function execute() {
 		$this->verbose = isset($this->params['verbose']);
@@ -40,29 +41,42 @@ class MediaWorkerTask extends QueueShell {
 		if (isset($this->params['description'])) {
 			$this->description = $this->params['description'];
 		}
+		if (isset($this->params['model'])) {
+			$this->model = $this->params['model'];
+		} else {
+			$this->model = $this->in('Model', null, 'Media.Attachment');
+		}
+		$this->_Model = ClassRegistry::init($this->model);
+
+		if (!isset($this->_Model->Behaviors->Generator)) {
+			$this->error("Model `{$this->model}` has the `Generator` behavior not attached to it.");
+		}
+
+		if (isset($this->params['tube'])) {
+			$this->tubes = array($this->params['tube']);
+		} elseif (isset($this->params['tubes'])) {
+			$this->tubes = explode(',', $this->params['tubes']);
+		} else {
+			$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
+		}
 
 		$this->log('Starting up.', 'debug');
 		$this->out($this->description);
 		$this->hr();
 
-		if ($this->args) {
-			$tubes = array_shift($this->args);
-			$this->interactive = false;
-		}
-		$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
+		$message = 'Watching tubes ' . implode(', ', $this->tubes) . '.';
+		$this->log($message, 'debug');
+		$this->out($message);
 
 		while (true) {
 			$this->hr();
-			$message = 'Watching tubes ' . implode(', ', $this->tubes) . '.';
-			$this->log($message, 'debug');
-			$this->out($message);
 
 			$message = 'Waiting for job...';
 			$this->log($message, 'debug');
 			$this->out("{$message} STRG+C to abort.");
 
 			$job = $this->Job->reserve(array('tubes' => $this->tubes));
-			$this->out('');
+			$this->out();
 
 			if (!$job) {
 				$message = 'Got invalid job.';
@@ -76,7 +90,7 @@ class MediaWorkerTask extends QueueShell {
 
 			if ($this->verbose) {
 				$this->out(var_export($job, true));
-				$this->out('');
+				$this->out();
 			}
 
 			$message = "Deriving media for job `{$this->Job->id}`...";
@@ -84,39 +98,26 @@ class MediaWorkerTask extends QueueShell {
 			$this->out($message);
 
 			extract($job['Job'], EXTR_OVERWRITE);
-			extract($process, EXTR_OVERWRITE);
 			$result = false;
 
-			$Media = Media::make($file, $instructions);
-			if ($Media) {
-				$Folder = new Folder($directory, true, 0777);
-				$result = $Media->store($directory . basename($file), $overwrite);
-
-				if (!$result) {
-					$message  = "Failed to store version `{$version}` ";
-					$message .= "of file `{$file}` part of job `{$this->Job->id}`. ";
-					$this->log($message, 'error');
-					$this->err($message);
-				}
-			} else {
-				$message  = "Failed to make version `{$version}` ";
-				$message .= "of file `{$file}` part of job `{$this->Job->id}`. ";
-				$this->log($message, 'error');
-				$this->err($message);
-			}
-
-			if ($result) {
+			if ($this->_Model->makeVersion($file, $process + array('delegate' => false))) {
 				$message = "Job `{$this->Job->id}` deleted."; // id is unset after delete
 
 				$this->Job->delete();
 
 				$this->log($message, 'debug');
 				$this->out("OK. {$message}");
+
 			} else {
+				$message  = "Failed to make version `{$process['version']}` ";
+				$message .= "of file `{$file}` part of job `{$this->Job->id}`. ";
+				$this->log($message, 'error');
+				$this->err($message);
+
 				$this->Job->bury();
 
 				$message = "Job `{$this->Job->id}` buried.";
-				$this->log($message, 'error');
+				$this->log($message, 'debug');
 				$this->out("FAILED. {$message}");
 			}
 		}
@@ -127,7 +128,6 @@ class MediaWorkerTask extends QueueShell {
 		$message = "{$this->description} - {$message}";
 		return parent::log($message, $type);
 	}
-
 }
 
 ?>
