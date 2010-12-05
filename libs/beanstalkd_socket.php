@@ -49,7 +49,7 @@ class BeanstalkdSocket {
 			'port' => 11300,
 			'timeout' => 1 // the timeout when connecting to the server
 		);
-		$this->_config = $defaults + $config;
+		$this->_config = $config + $defaults;
 	}
 
 	/**
