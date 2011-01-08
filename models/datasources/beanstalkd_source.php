@@ -205,7 +205,14 @@ class BeanstalkdSource extends DataSource {
 			return false;
 		}
 		$method = 'peek' . ucfirst($type);
-		return $this->connection->{$method}();
+
+		if (!$result = $this->connection->{$method}()) {
+			return false;
+		}
+		$data = $this->_decode($result['body']);
+		$data['id'] = $result['id'];
+
+		return $Model->set(array($Model->alias => $data));
 	}
 
 	function statistics(&$Model) {

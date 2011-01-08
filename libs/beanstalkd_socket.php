@@ -426,8 +426,10 @@ class BeanstalkdSocket {
 
 		switch ($status) {
 			case 'FOUND':
-				$id = (integer)strtok(' ');
-				return $this->_read((integer)strtok(' '));
+				return array(
+					'id' => (integer)strtok(' '),
+					'body' => $this->_read((integer)strtok(' '))
+				);
 			case 'NOT_FOUND':
 			default:
 				$this->_errors[] = $status;
