@@ -60,31 +60,28 @@ class MediaWorkerTask extends QueueShell {
 			$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
 		}
 
-		$this->log('Starting up.', 'debug');
-		$this->out($this->description);
+		$tubesDisplay = implode(', ', $this->tubes);
+		$this->log("Starting up watching tubes {$tubesDisplay}.", 'debug');
+		$this->out("{$this->description} is watching tubes {$tubesDisplay}.");
 		$this->hr();
-
-		$message = 'Watching tubes ' . implode(', ', $this->tubes) . '.';
-		$this->log($message, 'debug');
-		$this->out($message);
 
 		while (true) {
 			$this->hr();
-
-			$message = 'Waiting for job...';
-			$this->log($message, 'debug');
-			$this->out("{$message} STRG+C to abort.");
+			$this->out("Waiting for job.... STRG+C to abort.");
 
 			$job = $this->Job->reserve(array('tube' => $this->tubes));
 			$this->out();
+			$start = time();
 
 			if (!$job) {
-				$message = 'Got invalid job.';
+				$message = 'Got invalid job; burying.';
 				$this->log($message, 'error');
 				$this->error($message);
+
+				$this->Job->bury();
 				continue;
 			}
-			$message = "Got job `{$this->Job->id}`.";
+			$message = "Got job `{$this->Job->id}`; deriving media.";
 			$this->log($message, 'debug');
 			$this->out($message);
 
@@ -93,32 +90,31 @@ class MediaWorkerTask extends QueueShell {
 				$this->out();
 			}
 
-			$message = "Deriving media for job `{$this->Job->id}`...";
-			$this->log($message, 'debug');
-			$this->out($message);
-
 			extract($job['Job'], EXTR_OVERWRITE);
 			$result = false;
 
 			if ($this->_Model->makeVersion($file, $process + array('delegate' => false))) {
-				$message = "Job `{$this->Job->id}` deleted."; // id is unset after delete
+				$took = time() - $start;
+
+				$message  = "Successfully run make version `{$process['version']}` ";
+				$message .= "of file `{$file}` part of job `{$this->Job->id}`,";
+				$message .= " took {$took} s; deleting.";
+				$this->log($message, 'debug');
+				$this->out($message);
+				$this->out('OK');
 
 				$this->Job->delete();
-
-				$this->log($message, 'debug');
-				$this->out("OK. {$message}");
-
 			} else {
+				$took = time() - $took;
+
 				$message  = "Failed to make version `{$process['version']}` ";
-				$message .= "of file `{$file}` part of job `{$this->Job->id}`. ";
+				$message .= "of file `{$file}` part of job `{$this->Job->id}`,";
+				$message .= " took {$took} s; burying.";
 				$this->log($message, 'error');
 				$this->err($message);
+				$this->out('FAILED');
 
 				$this->Job->bury();
-
-				$message = "Job `{$this->Job->id}` buried.";
-				$this->log($message, 'debug');
-				$this->out("FAILED. {$message}");
 			}
 		}
 		$this->log('Exiting.', 'debug');
