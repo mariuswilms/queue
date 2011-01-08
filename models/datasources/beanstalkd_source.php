@@ -190,13 +190,7 @@ class BeanstalkdSource extends DataSource {
 		return $this->connection->kick($bound);
 	}
 
-	function peek(&$Model, $options = array()) {
-		if (!is_array($options)) {
-			$options = array('id' => $options);
-		}
-		$id = null;
-		extract($options, EXTR_OVERWRITE);
-
+	function peek(&$Model, $id = null) {
 		if ($id === null) {
 			$id = $Model->id;
 		}
