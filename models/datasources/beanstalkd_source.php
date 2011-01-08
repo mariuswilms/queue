@@ -203,6 +203,17 @@ class BeanstalkdSource extends DataSource {
 		return $this->connection->peek($id);
 	}
 
+	function next(&$Model, $type, $options = array()) {
+		$options += array(
+			'tube' => null
+		);
+		if ($options['tube'] && !$this->choose($Model, $options['tube'])) {
+			return false;
+		}
+		$method = 'peek' . ucfirst($type);
+		return $this->connection->{$method}();
+	}
+
 	function statistics(&$Model) {
 		return $this->connection->stats();
 	}
@@ -252,6 +263,7 @@ class BeanstalkdSource extends DataSource {
 			case 'bury':
 			case 'kick':
 			case 'peek':
+			case 'next':
 			case 'statistics':
 				$result = $this->dispatchMethod($method, $params);
 				$this->took = microtime(true) - $startQuery;

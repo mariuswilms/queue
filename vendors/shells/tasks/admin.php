@@ -33,11 +33,42 @@ class AdminTask extends QueueShell {
 		$this->verbose = isset($this->params['verbose']);
 
 		$this->out('[K]ick a certain number of jobs back into the ready queue.');
-		$action = $this->in('What would you like to do?', 'K');
+		$this->out('[P]urge *all* jobs from a certain queue *instantly*.');
+		$action = $this->in('What would you like to do?', array('K', 'P'));
 
-		switch(up($action)) {
+		$this->tubes = $this->_tubes();
+
+		switch (strtoupper($action)) {
 			case 'K':
-				$result = $this->Job->kick(array('bound' => $this->in('Number of jobs:', null, 100)));;
+				foreach ($this->tubes as $tube) {
+					$this->out("Will kick in jobs in tube `{$tube}`.");
+
+					$result = $this->Job->kick(array(
+						'bound' => $this->in('Number of jobs:', null, 100),
+					) + compact('tube'));
+				}
+				$this->out($result ? 'OK' : 'FAILED');
+				break;
+			case 'P':
+				$type = $this->in(
+					'Which type of jobs should be purged?',
+					array('ready', 'buried', 'delayed'),
+					'buried'
+				);
+
+				foreach ($this->tubes as $tube) {
+					$this->out("Purging {$type} jobs for tube `{$tube}`...");
+					$this->Job->choose($tube);
+
+					while ($job = $this->Job->next($type)) {
+						if ($this->Job->delete($job['Job']['id'])) {
+							$this->out("Job `{$job['Job']['id']}` deleted.");
+						} else {
+							$this->err("Failed to delete job `{$job['Job']['id']}`.");
+						}
+					}
+				}
+>>>>>>> 1146048... wip
 				break;
 		}
 		$this->out($result ? 'OK' : 'FAILED');
