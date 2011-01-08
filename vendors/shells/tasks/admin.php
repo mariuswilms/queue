@@ -69,10 +69,9 @@ class AdminTask extends QueueShell {
 						}
 					}
 				}
->>>>>>> 1146048... wip
 				break;
 		}
-		$this->out($result ? 'OK' : 'FAILED');
 	}
-
 }
+
+?>
