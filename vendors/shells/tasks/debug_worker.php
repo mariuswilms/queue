@@ -38,7 +38,7 @@ class DebugWorkerTask extends QueueShell {
 			$tubes = array_shift($this->args);
 			$this->interactive = false;
 		}
-		$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, $tubes));
+		$this->tubes = $this->_tubes();
 
 		while (true) {
 			$this->hr();

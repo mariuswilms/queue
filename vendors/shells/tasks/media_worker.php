@@ -51,14 +51,7 @@ class MediaWorkerTask extends QueueShell {
 		if (!isset($this->_Model->Behaviors->Generator)) {
 			$this->error("Model `{$this->model}` has the `Generator` behavior not attached to it.");
 		}
-
-		if (isset($this->params['tube'])) {
-			$this->tubes = array($this->params['tube']);
-		} elseif (isset($this->params['tubes'])) {
-			$this->tubes = explode(',', $this->params['tubes']);
-		} else {
-			$this->tubes = explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
-		}
+		$this->tubes = $this->_tubes();
 
 		$tubesDisplay = implode(', ', $this->tubes);
 		$this->log("Starting up watching tubes {$tubesDisplay}.", 'debug');

@@ -103,6 +103,20 @@ class QueueShell extends Shell {
 	}
 
 /**
+ * Helper method to get selected tubes.
+ *
+ * @return array The selected tubes.
+ */
+	function _tubes() {
+		if (isset($this->params['tube'])) {
+			return array($this->params['tube']);
+		} elseif (isset($this->params['tubes'])) {
+			return explode(',', $this->params['tubes']);
+		}
+		return explode(',', $this->in('Tubes to watch (separate with comma)', null, 'default'));
+	}
+
+/**
  * Displays help contents
  *
  * @return void
