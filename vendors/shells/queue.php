@@ -31,14 +31,12 @@ class QueueShell extends Shell {
  *
  * @see main()
  * @var string
- * @access public
  */
 	var $tasks = array('Statistics', 'Admin');
 
 /**
  * _welcome
  *
- * @access protected
  * @return void
  */
 	function _welcome() {
@@ -49,7 +47,6 @@ class QueueShell extends Shell {
 /**
  * main
  *
- * @access public
  * @return void
  */
 	function main() {
@@ -108,7 +105,7 @@ class QueueShell extends Shell {
 /**
  * Displays help contents
  *
- * @access public
+ * @return void
  */
 	function help() {
 		// 63 chars ===============================================================
