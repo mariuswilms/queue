@@ -31,7 +31,6 @@ class AdminTask extends QueueShell {
 
 	function execute() {
 		$this->verbose = isset($this->params['verbose']);
-		$this->tubes = $this->_tubes();
 
 		$this->out('[K]ick a certain number of jobs back into the ready queue.');
 		$this->out('[P]urge *all* jobs from a certain queue *instantly*.');
