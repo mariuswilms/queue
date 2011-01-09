@@ -24,21 +24,27 @@
  * @subpackage queue.shells.tasks
  */
 class StatisticsTask extends QueueShell {
+
 	var $uses = array('Queue.Job');
 
 	function execute() {
 		$this->out('Statistics');
 		$this->hr();
+
+		if (isset($this->params['once'])) {
+			$this->out(var_export($this->Job->statistics(), true));
+			return true;
+		}
 		$this->out('Updating every 5 seconds');
 		$this->out('Press STRG+C to abort');
 
 		while (true) {
-			$result = $this->Job->statistics();
 			$this->out('Got:');
-			$this->out(var_export($result, true));
+			$this->out(var_export($this->Job->statistics(), true));
 			sleep(5);
 			$this->hr();
 		}
 	}
 }
+
 ?>
