@@ -54,7 +54,7 @@ class DebugWorkerTask extends QueueShell {
 			$this->out('[T]ouch');
 			$action = $this->in('What would you like to do?', 'D,B,R,T', 'D');
 
-			switch(up($action)) {
+			switch(strtoupper($action)) {
 				case 'D':
 					$result = $this->Job->delete();
 					break;
