@@ -84,9 +84,13 @@ class MediaWorkerTask extends QueueShell {
 			}
 
 			extract($job['Job'], EXTR_OVERWRITE);
-			$result = false;
 
-			if ($this->_Model->makeVersion($file, $process + array('delegate' => false))) {
+			try {
+				$result = $this->_Model->makeVersion($file, $process + array('delegate' => false));
+			} catch (Exception $E) {
+				$result = false;
+			}
+			if ($result) {
 				$took = time() - $start;
 
 				$message  = "Successfully run make version `{$process['version']}` ";
