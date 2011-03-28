@@ -84,10 +84,12 @@ class MediaWorkerTask extends QueueShell {
 			}
 
 			extract($job['Job'], EXTR_OVERWRITE);
+			$exception = null;
 
 			try {
 				$result = $this->_Model->makeVersion($file, $process + array('delegate' => false));
 			} catch (Exception $E) {
+				$exception = $E->getMessage();
 				$result = false;
 			}
 			if ($result) {
@@ -107,6 +109,10 @@ class MediaWorkerTask extends QueueShell {
 				$message  = "Failed to make version `{$process['version']}` ";
 				$message .= "of file `{$file}` part of job `{$this->Job->id}`,";
 				$message .= " took {$took} s; burying.";
+
+				if ($exception) {
+					$message .= " The exception message was: `{$exception}`.";
+				}
 				$this->log($message, 'error');
 				$this->err($message);
 				$this->out('FAILED');
