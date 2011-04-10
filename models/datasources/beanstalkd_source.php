@@ -303,6 +303,8 @@ class BeanstalkdSource extends DataSource {
 	function delete(&$Model, $id = null) {
 		if ($id == null) {
 			$id = $Model->id;
+		} elseif (is_array($id)) {
+			$id = $id["{$Model->alias}.id"];
 		}
 		return $this->connection->delete($id);
 	}
