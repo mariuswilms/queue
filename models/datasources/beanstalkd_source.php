@@ -191,10 +191,7 @@ class BeanstalkdSource extends DataSource {
 	}
 
 	function peek(&$Model, $id = null) {
-		if ($id === null) {
-			$id = $Model->id;
-		}
-		return $this->connection->peek($id);
+		return $this->connection->peek($id !== null ? $id : $Model->id);
 	}
 
 	function next(&$Model, $type, $options = array()) {
