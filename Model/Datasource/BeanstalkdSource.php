@@ -8,7 +8,7 @@
  * Redistributions of files must retain the above copyright notice.
  *
  * PHP version 5
- * CakePHP version 1.2
+ * CakePHP version 2.x
  *
  * @package    queue
  * @subpackage queue.models.datasources
@@ -16,8 +16,8 @@
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/queue
  */
-App::import('Core', 'DataSource');
-App::import('Lib', 'Queue.BeanstalkdSocket');
+App::uses('Datasource', 'Model/Datasource');
+App::uses('Queue.BeanstalkdSocket', 'Lib');
 
 /**
  * Beanstalkd Source Class

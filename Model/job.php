@@ -1,6 +1,6 @@
 <?php
 /**
- * Queue App Model File
+ * Job Model File
  *
  * Copyright (c) 2009 David Persson
  *
@@ -8,7 +8,7 @@
  * Redistributions of files must retain the above copyright notice.
  *
  * PHP version 5
- * CakePHP version 1.2
+ * CakePHP version 2.x
  *
  * @package    queue
  * @subpackage queue.models
@@ -18,11 +18,20 @@
  */
 
 /**
- * Queue App Model Class
+ * Job Model Class
  *
  * @package    queue
  * @subpackage queue.models
  */
-class QueueAppModel extends AppModel {
+App::uses('Model', 'Model');
+class Job extends Model {
+
+/**
+ * Database configuration to use
+ *
+ * @var string
+ * @access public
+ */
+	var $useDbConfig = 'queue';
 }
 ?>
