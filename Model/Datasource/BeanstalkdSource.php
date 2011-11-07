@@ -68,7 +68,7 @@ class BeanstalkdSource extends DataSource {
 
 	function connect() {
 		if (!$this->connection->connect()) {
-			//throw new \InternalErrorException(__d('queue', 'Could not connect. Error given was "%s"', $this->lastError()));
+			throw new \InternalErrorException(__d('queue', 'Could not connect. Error given was "%s"', $this->lastError()));
 			return false;
 		}
 		return true;
