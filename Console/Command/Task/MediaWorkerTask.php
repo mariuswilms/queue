@@ -23,6 +23,7 @@
  * @package    queue
  * @subpackage queue.shells.tasks
  */
+App::uses('QueueShell', 'Queue.Console/Command');
 class MediaWorkerTask extends QueueShell {
 
 	var $description = 'Media Worker';

@@ -24,6 +24,7 @@ Configure::write('debug', 2);
  * @package    queue
  * @subpackage queue.shells.tasks
  */
+
 class DebugProducerTask extends QueueShell {
 	var $uses = array('Queue.Job');
 	var $count = 0;
@@ -47,7 +48,7 @@ class DebugProducerTask extends QueueShell {
 			$result = $this->Job->put(compact('body'));
 			$this->out($result ? 'OK Job ID ' . $this->Job->id : 'FAILED');
 
-			if (low($this->in('Continue?', array('y', 'n'), 'y')) == 'n') {
+			if (strtolower($this->in('Continue?', array('y', 'n'), 'y')) == 'n') {
 				$this->_stop();
 			}
 		}

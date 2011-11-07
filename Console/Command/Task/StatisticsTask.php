@@ -23,6 +23,7 @@
  * @package    queue
  * @subpackage queue.shells.tasks
  */
+//App::uses('QueueShell', 'Queue.Console/Command');
 class StatisticsTask extends QueueShell {
 
 	var $uses = array('Queue.Job');

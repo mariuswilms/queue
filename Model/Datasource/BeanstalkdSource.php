@@ -17,7 +17,7 @@
  * @link       http://github.com/davidpersson/queue
  */
 App::uses('Datasource', 'Model/Datasource');
-App::uses('Queue.BeanstalkdSocket', 'Lib');
+App::uses('BeanstalkdSocket', 'Queue.Lib');
 
 /**
  * Beanstalkd Source Class
@@ -68,8 +68,7 @@ class BeanstalkdSource extends DataSource {
 
 	function connect() {
 		if (!$this->connection->connect()) {
-			$error = $this->lastError();
-			trigger_error("BeanstalkdSource - Could not connect. Error given was '{$error}'.", E_USER_WARNING);
+			//throw new \InternalErrorException(__d('queue', 'Could not connect. Error given was "%s"', $this->lastError()));
 			return false;
 		}
 		return true;
