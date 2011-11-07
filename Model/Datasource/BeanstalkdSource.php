@@ -38,6 +38,20 @@ class BeanstalkdSource extends DataSource {
 	var $__insertID;
 
 /**
+ * Start quote to avoid notice
+ *
+ * @var string
+ */
+	public $startQuote = "`";
+
+/**
+ * End quote to avoid notice
+ *
+ * @var string
+ */
+	public $endQuote = "`";
+
+/**
  * The default configuration of a specific DataSource
  *
  * @var array
