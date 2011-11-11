@@ -82,45 +82,69 @@ class MediaWorkerTask extends QueueShell {
 				$this->out(var_export($job, true));
 				$this->out();
 			}
-
-			extract($job['Job'], EXTR_OVERWRITE);
-			$exception = null;
-
-			try {
-				$result = $this->_Model->makeVersion($file, $process + array('delegate' => false));
-			} catch (Exception $E) {
-				$exception = $E->getMessage();
-				$result = false;
-			}
-			if ($result) {
-				$took = time() - $start;
-
-				$message  = "Successfully run make version `{$process['version']}` ";
-				$message .= "of file `{$file}` part of job `{$this->Job->id}`,";
-				$message .= " took {$took} s; deleting.";
-				$this->log($message, 'debug');
-				$this->out($message);
-				$this->out('OK');
-
-				$this->Job->delete();
-			} else {
-				$took = time() - $took;
-
-				$message  = "Failed to make version `{$process['version']}` ";
-				$message .= "of file `{$file}` part of job `{$this->Job->id}`,";
-				$message .= " took {$took} s; burying.";
-
-				if ($exception) {
-					$message .= " The exception message was: `{$exception}`.";
-				}
-				$this->log($message, 'error');
-				$this->err($message);
-				$this->out('FAILED');
-
-				$this->Job->bury();
-			}
+			$this->_process($job);
 		}
 		$this->log('Exiting.', 'debug');
+	}
+
+	function process($job) {
+		extract($job['Job'], EXTR_OVERWRITE);
+		$exception = null;
+
+		if (!file_exists($file)) {
+			$message = "File `{$file}` has gone since job creation.";
+			$this->log($message, 'debug');
+			$this->out($message);
+
+			$message = "Deleting job `{$this->Job->id}`.";
+			$this->log($message, 'debug');
+			$this->out($message);
+
+			$this->out('SKIP');
+
+			$this->Job->delete();
+			return true;
+		}
+
+		try {
+			$result = $this->_Model->makeVersion($file, $process + array('delegate' => false));
+		} catch (Exception $E) {
+			$exception = $E->getMessage();
+			$result = false;
+		}
+		$took = time() - $start;
+
+		if ($result) {
+			$message = "Version `{$process['version']}` of file `{$file}` made; took {$took} s.";
+			$this->log($message, 'debug');
+			$this->out($message);
+
+			$message = "Deleting job `{$this->Job->id}`.";
+			$this->log($message, 'debug');
+			$this->out($message);
+
+			$this->out('OK');
+
+			$this->Job->delete();
+			return true;
+		}
+		$message  = "Failed making version `{$process['version']}` of file `{$file}`; ";
+		$message .= "took {$took} s.";
+
+		if ($exception) {
+			$message .= " Exception message was: `{$exception}`.";
+		}
+		$this->log($message, 'error');
+		$this->err($message);
+
+		$message = "Burying job `{$this->Job->id}`.";
+		$this->log($message, 'debug');
+		$this->out($message);
+
+		$this->out('FAILED');
+
+		$this->Job->bury();
+		return false;
 	}
 
 	function log($message, $type = 'debug') {
