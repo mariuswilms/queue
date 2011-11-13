@@ -64,7 +64,6 @@ class MediaWorkerTask extends QueueShell {
 
 			$job = $this->Job->reserve(array('tube' => $this->tubes));
 			$this->out();
-			$start = time();
 
 			if (!$job) {
 				$message = 'Got invalid job; burying.';
@@ -87,9 +86,11 @@ class MediaWorkerTask extends QueueShell {
 		$this->log('Exiting.', 'debug');
 	}
 
-	function process($job) {
+	function _process($job) {
 		extract($job['Job'], EXTR_OVERWRITE);
 		$exception = null;
+
+		$start = time();
 
 		if (!file_exists($file)) {
 			$message = "File `{$file}` has gone since job creation.";
