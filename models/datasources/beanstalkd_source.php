@@ -192,10 +192,7 @@ class BeanstalkdSource extends DataSource {
 	}
 
 	function peek(&$Model, $id = null) {
-		if ($id === null) {
-			$id = $Model->id;
-		}
-		return $this->connection->peek($id);
+		return $this->connection->peek($id !== null ? $id : $Model->id);
 	}
 
 	function next(&$Model, $type, $options = array()) {
@@ -216,8 +213,17 @@ class BeanstalkdSource extends DataSource {
 		return $Model->set(array($Model->alias => $data));
 	}
 
-	function statistics(&$Model) {
-		return $this->connection->stats();
+	function statistics(&$Model, $type = null, $key = null) {
+		if (!$type) {
+			return $this->connection->stats();
+		} elseif ($type == 'job') {
+			$key = $key !== null ? $key : $Model->id;
+			return $this->connection->statsJob($key);
+		} elseif ($type == 'tube') {
+			$key = $key !== null ? $key : $this->connection->listTubeChosen();
+			return $this->connection->statsTube($key);
+		}
+		return false;
 	}
 
 	function _encode($data) {
