@@ -17,6 +17,8 @@
  * @link       http://github.com/davidpersson/queue
  */
 
+App::import('Core', 'ConnectionManager');
+
 /**
  * Job Model Class
  *
@@ -29,8 +31,26 @@ class Job extends QueueAppModel {
  * Database configuration to use
  *
  * @var string
- * @access public
  */
 	var $useDbConfig = 'queue';
+
+/**
+ * Check to see if queue is online and accepts jobs.
+ *
+ * @param array $cached Pass `true` to enable cached responses.
+ * @return boolean
+ */
+	function online($cached = false) {
+		static $status;
+
+		if ($cached && isset($status)) {
+			return $status;
+		}
+		$Manager = ConnectionManager::getInstance();
+		@$DataSource = $Manager->getDataSource($this->useDbConfig);
+
+		return $status = $DataSource && $DataSource->isConnected();
+	}
 }
+
 ?>
