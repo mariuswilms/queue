@@ -17,7 +17,7 @@
  * @link       http://github.com/davidpersson/queue
  */
 App::import('Core', 'DataSource');
-App::import('Lib', 'Queue.BeanstalkdSocket');
+require_once dirname(dirname(dirname(__FILE__))) . '/libs/beanstalk/src/Socket/Beanstalk.php';
 
 /**
  * Beanstalkd Source Class
@@ -55,7 +55,7 @@ class BeanstalkdSource extends DataSource {
 		parent::__construct();
 		$this->setConfig($config);
 		$this->fullDebug = Configure::read('debug') > 1;
-		$this->connection = new BeanstalkdSocket($this->config);
+		$this->connection = new Socket_Beanstalk($this->config);
 		$this->connected =& $this->connection->connected;
 		$this->connect();
 	}
