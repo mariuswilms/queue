@@ -87,6 +87,11 @@ class BeanstalkdSource extends DataSource {
 		unset($Model->data[$Model->alias]);
 		$Model->set($data);
 		$body = $Model->data[$Model->alias];
+		
+		if (empty($body))
+		{
+			return false;
+		}
 
 		$priority = 0;
 		$delay = 0;
