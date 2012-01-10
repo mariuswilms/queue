@@ -24,7 +24,9 @@ Configure::write('debug', 2);
  * @package    queue
  * @subpackage queue.shells.tasks
  */
+
 class DebugWorkerTask extends QueueShell {
+
 	var $uses = array('Queue.Job');
 	var $tubes = array('default');
 
@@ -52,9 +54,9 @@ class DebugWorkerTask extends QueueShell {
 			$this->out('[B]ury');
 			$this->out('[R]elease');
 			$this->out('[T]ouch');
-			$action = $this->in('What would you like to do?', 'D,B,R,T', 'D');
 
-			switch (strtoupper($action)) {
+			$action = strtoupper($this->in(__d('queue', 'What would you like to do?'), array('D', 'B', 'R', 'T'), 'D'));
+			switch ($action) {
 				case 'D':
 					$result = $this->Job->delete();
 					break;
@@ -70,7 +72,7 @@ class DebugWorkerTask extends QueueShell {
 			}
 			$this->out($result ? 'OK' : 'FAILED');
 
-			if (low($this->in('Continue?', array('y', 'n'), 'y')) == 'n') {
+			if (strtolower($this->in('Continue?', array('y', 'n'), 'y')) == 'n') {
 				$this->_stop();
 			}
 		}

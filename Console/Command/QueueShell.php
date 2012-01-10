@@ -16,7 +16,6 @@
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/queue
  */
-Configure::write('Cache.disable', true);
 
 /**
  * Manage Shell Class
@@ -32,7 +31,7 @@ class QueueShell extends Shell {
  * @see main()
  * @var string
  */
-	var $tasks = array('Statistics', 'Admin');
+	var $tasks = array('Queue.Statistics', 'Queue.Admin');
 
 /**
  * _welcome
@@ -40,7 +39,7 @@ class QueueShell extends Shell {
  * @return void
  */
 	function _welcome() {
-		$this->out('Queue Plugin Shell');
+		$this->out(__d('queue', 'Queue Plugin Shell'));
 		$this->hr();
 	}
 
@@ -50,6 +49,9 @@ class QueueShell extends Shell {
  * @return void
  */
 	function main() {
+
+		Configure::write('Cache.disable', 1);
+
 		if ($this->args) {
 			$worker = strpos($this->args[0], '_worker') !== false;
 			$producer = strpos($this->args[0], '_producer') !== false;
@@ -59,14 +61,14 @@ class QueueShell extends Shell {
 			}
 		}
 
-		$this->out('[P]roducer');
-		$this->out('[W]orker');
-		$this->out('[A]dmin');
-		$this->out('[S]tatistics');
-		$this->out('[H]elp');
-		$this->out('[Q]uit');
+		$this->out(__d('queue', '[P]roducer'));
+		$this->out(__d('queue', '[W]orker'));
+		$this->out(__d('queue', '[A]dmin'));
+		$this->out(__d('queue', '[S]tatistics'));
+		$this->out(__d('queue', '[H]elp'));
+		$this->out(__d('queue', '[Q]uit'));
 
-		$action = strtoupper($this->in('What would you like to do?', array('W', 'P', 'S', 'A', 'H', 'Q'),'q'));
+		$action = strtoupper($this->in(__d('queue', 'What would you like to do?'), array('W', 'P', 'S', 'A', 'H', 'Q'), 'Q'));
 		switch($action) {
 			case 'W':
 			case 'P':
@@ -95,7 +97,7 @@ class QueueShell extends Shell {
 		$name = Inflector::camelize($name);
 
 		if (!isset($this->{$name})) {
-			$this->tasks[] = $name;
+			$this->tasks[] = 'Queue.' . $name;
 			$this->loadTasks();
 			$this->{$name}->initialize();
 		}
@@ -123,6 +125,7 @@ class QueueShell extends Shell {
  */
 	function help() {
 		// 63 chars ===============================================================
+
 		$this->out('');
 		$this->hr();
 		$this->out('Usage: cake <params> queue <command> <args>');

@@ -8,7 +8,7 @@
  * Redistributions of files must retain the above copyright notice.
  *
  * PHP version 5
- * CakePHP version 1.2
+ * CakePHP version 2.x
  *
  * @package    queue
  * @subpackage queue.models.datasources
@@ -16,8 +16,8 @@
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/queue
  */
-App::import('Core', 'DataSource');
-App::import('Lib', 'Queue.BeanstalkdSocket');
+App::uses('Datasource', 'Model/Datasource');
+App::uses('BeanstalkdSocket', 'Queue.Lib');
 
 /**
  * Beanstalkd Source Class
@@ -36,6 +36,20 @@ class BeanstalkdSource extends DataSource {
  * @access private
  */
 	var $__insertID;
+
+/**
+ * Start quote to avoid notice
+ *
+ * @var string
+ */
+	public $startQuote = "`";
+
+/**
+ * End quote to avoid notice
+ *
+ * @var string
+ */
+	public $endQuote = "`";
 
 /**
  * The default configuration of a specific DataSource
@@ -68,8 +82,7 @@ class BeanstalkdSource extends DataSource {
 
 	function connect() {
 		if (!$this->connection->connect()) {
-			$error = $this->lastError();
-			trigger_error("BeanstalkdSource - Could not connect. Error given was '{$error}'.", E_USER_WARNING);
+			throw new \InternalErrorException(__d('queue', 'Could not connect. Error given was "%s"', $this->lastError()));
 			return false;
 		}
 		return true;
@@ -84,6 +97,7 @@ class BeanstalkdSource extends DataSource {
 	}
 
 	function put(&$Model, $data, $options = array()) {
+		unset($Model->data[$Model->alias]);
 		$Model->set($data);
 		$body = $Model->data[$Model->alias];
 
