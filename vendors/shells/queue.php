@@ -32,7 +32,7 @@ class QueueShell extends Shell {
  * @see main()
  * @var string
  */
-	var $tasks = array('Statistics', 'Admin');
+	var $tasks = array('Statistics', 'Tube', 'Admin');
 
 /**
  * _welcome
@@ -62,11 +62,13 @@ class QueueShell extends Shell {
 		$this->out('[P]roducer');
 		$this->out('[W]orker');
 		$this->out('[A]dmin');
-		$this->out('[S]tatistics');
+    $this->out('[S]tatistics');
+    $this->out('[L]ist Tubes');
+		$this->out('[T]ube Statistics');
 		$this->out('[H]elp');
 		$this->out('[Q]uit');
 
-		$action = strtoupper($this->in('What would you like to do?', array('W', 'P', 'S', 'A', 'H', 'Q'),'q'));
+		$action = strtoupper($this->in('What would you like to do?', array('W', 'P', 'S', 'L', 'T', 'A', 'H', 'Q'),'q'));
 		switch($action) {
 			case 'W':
 			case 'P':
@@ -76,8 +78,14 @@ class QueueShell extends Shell {
 				$name = $this->in($prompt, null, 'debug');
 				$this->_executeTask($name . ($action == 'W' ? '_worker' : '_producer'));
 				break;
-			case 'S':
-				$this->Statistics->execute();
+      case 'S':
+        $this->Statistics->execute();
+        break;
+      case 'L':
+        $this->Tube->listTubes();
+        break;
+			case 'T':
+				$this->Tube->statistics();
 				break;
 			case 'H':
 				$this->help();

@@ -41,6 +41,8 @@ class BeanstalkdSocket {
 	protected $_connection;
 
 	protected $_errors = array();
+	
+	protected $_maxErrors = 200;
 
 	public function __construct(array $config = array()) {
 		$defaults = array(
@@ -79,7 +81,7 @@ class BeanstalkdSocket {
 		$this->_connection = @call_user_func_array($function, $params);
 
 		if (!empty($errNum) || !empty($errStr)) {
-			$this->_errors[] = "{$errNum}: {$errStr}";
+			$this->_logError("{$errNum}: {$errStr}");
 		}
 
 		$this->connected = is_resource($this->_connection);
@@ -110,6 +112,15 @@ class BeanstalkdSocket {
 
 	public function errors() {
 		return $this->_errors;
+	}
+	
+	protected function _logError($error)
+	{
+		$this->_errors[] = $error;
+		if (count($this->_errors) > $this->_maxErrors)
+		{
+			array_pop($this->_errors);
+		}
 	}
 
 	/**
@@ -145,7 +156,7 @@ class BeanstalkdSocket {
 			$meta = stream_get_meta_data($this->_connection);
 
 			if ($meta['timed_out']) {
-				$this->_errors[] = 'Connection timed out.';
+				$this->_logError('Connection timed out.');
 				return false;
 			}
 			$packet = rtrim($data, "\r\n");
@@ -182,7 +193,7 @@ class BeanstalkdSocket {
 			case 'EXPECTED_CRLF':
 			case 'JOB_TOO_BIG':
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -204,7 +215,7 @@ class BeanstalkdSocket {
 			case 'USING':
 				return strtok(' ');
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -241,7 +252,7 @@ class BeanstalkdSocket {
 			case 'DEADLINE_SOON':
 			case 'TIMED_OUT':
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -261,7 +272,7 @@ class BeanstalkdSocket {
 				return true;
 			case 'NOT_FOUND':
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -284,7 +295,7 @@ class BeanstalkdSocket {
 				return true;
 			case 'NOT_FOUND':
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -308,7 +319,7 @@ class BeanstalkdSocket {
 				return true;
 			case 'NOT_FOUND':
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -328,7 +339,7 @@ class BeanstalkdSocket {
 				return true;
 			case 'NOT_TOUCHED':
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -348,7 +359,7 @@ class BeanstalkdSocket {
 			case 'WATCHING':
 				return (integer)strtok(' ');
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -368,7 +379,7 @@ class BeanstalkdSocket {
 				return (integer)strtok(' ');
 			case 'NOT_IGNORED':
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -432,7 +443,7 @@ class BeanstalkdSocket {
 				);
 			case 'NOT_FOUND':
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -454,7 +465,7 @@ class BeanstalkdSocket {
 			case 'KICKED':
 				return (integer)strtok(' ');
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -475,7 +486,22 @@ class BeanstalkdSocket {
 	 * @param string $tube Name of the tube
 	 * @return string|boolean False on error otherwise a string with a yaml formatted dictionary
 	 */
-	public function statsTube($tube) {}
+	public function statsTube($tube) {
+    if ($tube)
+    {
+      $this->_write('stats-tube ' . $tube);
+      $status = strtok($this->_read(), ' ');
+
+      switch ($status) {
+        case 'OK':
+          return $this->_read((integer)strtok(' '));
+        default:
+          $this->_logError($status);
+          return false;
+      }
+    }
+    return false;
+  }
 
 	/**
 	 * Gives statistical information about the system as a whole
@@ -490,7 +516,7 @@ class BeanstalkdSocket {
 			case 'OK':
 				return $this->_read((integer)strtok(' '));
 			default:
-				$this->_errors[] = $status;
+				$this->_logError($status);
 				return false;
 		}
 	}
@@ -500,7 +526,18 @@ class BeanstalkdSocket {
 	 *
 	 * @return string|boolean False on error otherwise a string with a yaml formatted list
 	 */
-	public function listTubes() {}
+	public function listTubes() {
+    $this->_write('list-tubes');
+    $status = strtok($this->_read(), ' ');
+
+    switch ($status) {
+      case 'OK':
+        return $this->_read((integer)strtok(' '));
+      default:
+        $this->_logError($status);
+        return false;
+    }
+  }
 
 	/**
 	 * Returns the tube currently being used by the producer

@@ -23,16 +23,26 @@
  * @package    queue
  * @subpackage queue.shells.tasks
  */
-class StatisticsTask extends QueueShell {
+class TubeTask extends QueueShell {
 
 	var $uses = array('Queue.Job');
 
-	function execute() {
-		$this->out('Statistics');
+  function listTubes() {
+    $this->out('Tubes');
+    $this->hr();
+    
+    $this->out(var_export($this->Job->listTubes(), true));
+  }
+  
+	function statistics() {
+    
+    $tube = $this->in('Tube: ', null, 'default');
+    
+		$this->out('Tube Statistics: ' . $tube);
 		$this->hr();
 
 		if (isset($this->params['once'])) {
-			$this->out(var_export($this->Job->statistics(), true));
+			$this->_displayStats($this->Job->statsTube($tube));
 			return true;
 		}
 		$this->out('Updating every 5 seconds');
@@ -40,11 +50,27 @@ class StatisticsTask extends QueueShell {
 
 		while (true) {
 			$this->out('Got:');
-			$this->out(var_export($this->Job->statistics(), true));
+			$this->_displayStats($this->Job->statsTube($tube));
+      
 			sleep(5);
 			$this->hr();
 		}
 	}
+  
+  protected function _displayStats($stats)
+  {
+    if ($stats)
+    {
+      foreach ($stats as $key => $value)
+      {
+        $this->out("{$key}: {$value}");
+      }
+    }
+    else
+    {
+      $this->out('Error retrieving stats');
+    }
+  }
 }
 
 ?>

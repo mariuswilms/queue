@@ -84,8 +84,14 @@ class BeanstalkdSource extends DataSource {
 	}
 
 	function put(&$Model, $data, $options = array()) {
+		unset($Model->data[$Model->alias]);
 		$Model->set($data);
 		$body = $Model->data[$Model->alias];
+		
+		if (empty($body))
+		{
+			return false;
+		}
 
 		$priority = 0;
 		$delay = 0;
@@ -224,6 +230,47 @@ class BeanstalkdSource extends DataSource {
 		}
 		return false;
 	}
+  
+  function statsTube(&$Model, $tube) {
+    $statsTube = $this->connection->statsTube($tube);
+    $result = array();
+    
+    if ($statsTube)
+    {
+      $statsTube = explode("\n", $statsTube);
+      foreach ($statsTube as $stat)
+      {
+        $stat = trim($stat);
+        if ($stat !== '---')
+        {
+          list($key, $value) = explode(': ', $stat);
+          $result[$key] = $value;
+        }
+      }
+      return $result;
+    }
+    return false;
+  }
+  
+  function listTubes(&$Model) {
+    $tubes = $this->connection->listTubes();
+    $result = array();
+    
+    if ($tubes)
+    {
+      $tubes = explode("\n", $tubes);
+      foreach ($tubes as $line)
+      {
+        $line = trim($line);
+        if ($line !== '---')
+        {
+          $result[] = trim($line, '- ');
+        }
+      }
+      return $result;
+    }
+    return false;
+  }
 
 	function _encode($data) {
 		switch ($this->config['format']) {
@@ -270,7 +317,9 @@ class BeanstalkdSource extends DataSource {
 			case 'bury':
 			case 'kick':
 			case 'peek':
-			case 'next':
+      case 'next':
+      case 'listTubes':
+			case 'statsTube':
 			case 'statistics':
 				$result = $this->dispatchMethod($method, $params);
 				$this->took = microtime(true) - $startQuery;
@@ -345,13 +394,16 @@ class BeanstalkdSource extends DataSource {
 	function logQuery($method, $params) {
 		$this->_queriesCnt++;
 		$this->_queriesTime += $this->took;
-		$this->_queriesLog[] = array(
-			'query' => $method,
-			'error' => $this->error,
-			'took' => $this->took,
-			'affected' => 0,
-			'numRows' => 0
-		);
+    $this->_queriesLog[] = array(
+      'query' => $method,
+      'error' => $this->error,
+      'took' => $this->took,
+      'affected' => 0,
+      'numRows' => 0
+    );
+    if (count($this->_queriesLog) > $this->_queriesLogMax) {
+      array_pop($this->_queriesLog);
+    }
 	}
 
 	function lastError() {
