@@ -230,6 +230,47 @@ class BeanstalkdSource extends DataSource {
 		}
 		return false;
 	}
+  
+  function statsTube(&$Model, $tube) {
+    $statsTube = $this->connection->statsTube($tube);
+    $result = array();
+    
+    if ($statsTube)
+    {
+      $statsTube = explode("\n", $statsTube);
+      foreach ($statsTube as $stat)
+      {
+        $stat = trim($stat);
+        if ($stat !== '---')
+        {
+          list($key, $value) = explode(': ', $stat);
+          $result[$key] = $value;
+        }
+      }
+      return $result;
+    }
+    return false;
+  }
+  
+  function listTubes(&$Model) {
+    $tubes = $this->connection->listTubes();
+    $result = array();
+    
+    if ($tubes)
+    {
+      $tubes = explode("\n", $tubes);
+      foreach ($tubes as $line)
+      {
+        $line = trim($line);
+        if ($line !== '---')
+        {
+          $result[] = trim($line, '- ');
+        }
+      }
+      return $result;
+    }
+    return false;
+  }
 
 	function _encode($data) {
 		switch ($this->config['format']) {
@@ -276,7 +317,9 @@ class BeanstalkdSource extends DataSource {
 			case 'bury':
 			case 'kick':
 			case 'peek':
-			case 'next':
+      case 'next':
+      case 'listTubes':
+			case 'statsTube':
 			case 'statistics':
 				$result = $this->dispatchMethod($method, $params);
 				$this->took = microtime(true) - $startQuery;

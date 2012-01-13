@@ -486,7 +486,22 @@ class BeanstalkdSocket {
 	 * @param string $tube Name of the tube
 	 * @return string|boolean False on error otherwise a string with a yaml formatted dictionary
 	 */
-	public function statsTube($tube) {}
+	public function statsTube($tube) {
+    if ($tube)
+    {
+      $this->_write('stats-tube ' . $tube);
+      $status = strtok($this->_read(), ' ');
+
+      switch ($status) {
+        case 'OK':
+          return $this->_read((integer)strtok(' '));
+        default:
+          $this->_logError($status);
+          return false;
+      }
+    }
+    return false;
+  }
 
 	/**
 	 * Gives statistical information about the system as a whole
@@ -511,7 +526,18 @@ class BeanstalkdSocket {
 	 *
 	 * @return string|boolean False on error otherwise a string with a yaml formatted list
 	 */
-	public function listTubes() {}
+	public function listTubes() {
+    $this->_write('list-tubes');
+    $status = strtok($this->_read(), ' ');
+
+    switch ($status) {
+      case 'OK':
+        return $this->_read((integer)strtok(' '));
+      default:
+        $this->_logError($status);
+        return false;
+    }
+  }
 
 	/**
 	 * Returns the tube currently being used by the producer
