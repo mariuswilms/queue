@@ -302,11 +302,11 @@ class BeanstalkdSource extends DataSource {
 	}
 
 	function read(&$Model, $queryData = array()) {
-		if ($queryData['fields'] == 'count') {
+		//if ($queryData['fields'] == 'count') { // not working anymore in 2.0
 			if ($this->peek($Model, $queryData['conditions']['Job.id'])) {
 				return array(0 => array(0 => array('count' => 1)));
 			}
-		}
+		//}
 		return false;
 	}
 

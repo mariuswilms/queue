@@ -32,6 +32,6 @@ class Job extends Model {
  * @var string
  * @access public
  */
-	var $useDbConfig = 'queue';
+	public $useDbConfig = 'queue';
 }
 ?>
