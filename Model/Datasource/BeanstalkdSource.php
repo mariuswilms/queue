@@ -148,6 +148,15 @@ class BeanstalkdSource extends DataSource {
 		return true;
 	}
 
+	function ignore(&$Model, $tube) {
+		foreach ((array)$tube as $t) {
+			if (!$this->connection->ignore($t)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	function release(&$Model, $options = array()) {
 		if (!is_array($options)) {
 			$options = array('id' => $options);
@@ -285,6 +294,7 @@ class BeanstalkdSource extends DataSource {
 			case 'kick':
 			case 'peek':
 			case 'next':
+			case 'ignore':
 			case 'statistics':
 				$result = $this->dispatchMethod($method, $params);
 				$this->took = microtime(true) - $startQuery;
