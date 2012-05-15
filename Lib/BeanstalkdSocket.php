@@ -150,7 +150,9 @@ class BeanstalkdSocket {
 			}
 			$packet = rtrim($data, "\r\n");
 		} else {
-			$packet = stream_get_line($this->_connection, 16384, "\r\n");
+			$packet = fgets($this->_connection, 16384);
+			if($packet) $packet = substr($packet, 0, -2);
+			//$packet = stream_get_line($this->_connection, 16384, "\r\n");
 		}
 		return $packet;
 	}
