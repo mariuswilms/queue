@@ -33,5 +33,8 @@ class Job extends Model {
  * @access public
  */
 	public $useDbConfig = 'queue';
+	public $useTable = false;
+	protected $_schema = array();
+
 }
 ?>
