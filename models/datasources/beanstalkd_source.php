@@ -345,16 +345,16 @@ class BeanstalkdSource extends DataSource {
 	function logQuery($method, $params) {
 		$this->_queriesCnt++;
 		$this->_queriesTime += $this->took;
-    $this->_queriesLog[] = (array(
-      'query' => $method,
-      'error' => $this->error,
-      'took' => $this->took,
-      'affected' => 0,
-      'numRows' => 0
-    ));
-    if (count($this->_queriesLog) > $this->_queriesLogMax) {
-      array_pop($this->_queriesLog);
-    }
+		$this->_queriesLog[] = (array(
+			'query' => $method,
+			'error' => $this->error,
+			'took' => $this->took,
+			'affected' => 0,
+			'numRows' => 0
+		));
+		if (count($this->_queriesLog) > $this->_queriesLogMax) {
+			array_pop($this->_queriesLog);
+		}
 	}
 
 	function lastError() {
