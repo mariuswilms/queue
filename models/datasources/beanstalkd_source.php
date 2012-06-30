@@ -341,20 +341,28 @@ class BeanstalkdSource extends DataSource {
 
 	function describe($model) {
 	}
-
+/**
+ * Logs a new query. Will automatically truncate already logged so at any time
+ * there are no more than 200 messages logged.
+ *
+ * @param string $method
+ * @param array $params
+ * @return void
+ */
 	function logQuery($method, $params) {
 		$this->_queriesCnt++;
 		$this->_queriesTime += $this->took;
-		$this->_queriesLog[] = (array(
+
+		if (count($this->_queriesLog) >= 200) {
+			array_shift($this->_queriesLog);
+		}
+		array_push($this->_queriesLog, array(
 			'query' => $method,
 			'error' => $this->error,
 			'took' => $this->took,
 			'affected' => 0,
 			'numRows' => 0
 		));
-		if (count($this->_queriesLog) > $this->_queriesLogMax) {
-			array_pop($this->_queriesLog);
-		}
 	}
 
 	function lastError() {
