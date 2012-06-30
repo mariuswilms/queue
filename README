@@ -52,6 +52,7 @@
   Versions & Requirements
   -----------------------
   1.0.0, CakePHP 1.3.x, PHP >=5.2.1, beanstalkd >=1.2
+  1.1.0, CakePHP 1.3.xm PHP >=5.2.1, beanstalkd >=1.2 (in progress)
 
   Usage
   -----
