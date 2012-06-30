@@ -46,6 +46,7 @@
   3. Configure the connection to the queue server in your database.php.
      You may also add 'host' and 'port' keys depending on your setup.
      {{{
+        // ...
         'queue' => array('datasource' => 'beanstalkd')
      }}}
 

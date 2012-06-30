@@ -28,7 +28,12 @@ App::import('Core', 'ConnectionManager');
 class Job extends QueueAppModel {
 
 /**
- * Database configuration to use
+ * Database configuration to use. Before using this model be sure to
+ * define at least a minimal connection in your database.php file:
+ * {{{
+ *   // ...
+ *	'queue' => array('datasource' => 'beanstalkd')
+ * }}}
  *
  * @var string
  */
