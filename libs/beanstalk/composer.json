@@ -1,0 +1,19 @@
+{
+    "name": "davidpersson/beanstalk",
+    "description": "A minimalistic PHP beanstalk client.",
+    "keywords": ["queue", "socket", "beanstalk"],
+    "homepage": "https://github.com/davidpersson/beanstalk",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Persson",
+            "email": "davidpersson@gmx.de"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.1"
+    },
+    "autoload": {
+        "psr-0": { "Socket_Beanstalk": "src/" }
+    }
+}
