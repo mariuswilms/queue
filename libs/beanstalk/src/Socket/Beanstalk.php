@@ -2,12 +2,12 @@
 /**
  * beanstalk: A minimalistic PHP beanstalk client.
  *
- * Copyright (c) 2009-2012 David Persson
+ * Copyright (c) 2009-2013 David Persson
  *
  * Distributed under the terms of the MIT License.
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright  2009-2012 David Persson <nperson@gmx.de>
+ * @copyright  2009-2013 David Persson <nperson@gmx.de>
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link       http://github.com/davidpersson/beanstalk
  */
@@ -195,7 +195,7 @@ class Socket_Beanstalk {
 			if (feof($this->_connection)) {
 				return false;
 			}
-			$data = fread($this->_connection, $length + 2);
+			$data = stream_get_contents($this->_connection, $length + 2);
 			$meta = stream_get_meta_data($this->_connection);
 
 			if ($meta['timed_out']) {
@@ -226,14 +226,13 @@ class Socket_Beanstalk {
 	 *         the job id.
 	 */
 	public function put($pri, $delay, $ttr, $data) {
-		$this->_write(sprintf('put %d %d %d %d', $pri, $delay, $ttr, strlen($data)));
-		$this->_write($data);
+		$this->_write(sprintf("put %d %d %d %d\r\n%s", $pri, $delay, $ttr, strlen($data), $data));
 		$status = strtok($this->_read(), ' ');
 
 		switch ($status) {
 			case 'INSERTED':
 			case 'BURIED':
-				return (integer)strtok(' '); // job id
+				return (integer) strtok(' '); // job id
 			case 'EXPECTED_CRLF':
 			case 'JOB_TOO_BIG':
 			default:
@@ -299,8 +298,8 @@ class Socket_Beanstalk {
 		switch ($status) {
 			case 'RESERVED':
 				return array(
-					'id' => (integer)strtok(' '),
-					'body' => $this->_read((integer)strtok(' '))
+					'id' => (integer) strtok(' '),
+					'body' => $this->_read((integer) strtok(' '))
 				);
 			case 'DEADLINE_SOON':
 			case 'TIMED_OUT':
@@ -408,7 +407,7 @@ class Socket_Beanstalk {
 
 		switch ($status) {
 			case 'WATCHING':
-				return (integer)strtok(' ');
+				return (integer) strtok(' ');
 			default:
 				$this->_error($status);
 				return false;
@@ -427,7 +426,7 @@ class Socket_Beanstalk {
 
 		switch ($status) {
 			case 'WATCHING':
-				return (integer)strtok(' ');
+				return (integer) strtok(' ');
 			case 'NOT_IGNORED':
 			default:
 				$this->_error($status);
@@ -489,8 +488,8 @@ class Socket_Beanstalk {
 		switch ($status) {
 			case 'FOUND':
 				return array(
-					'id' => (integer)strtok(' '),
-					'body' => $this->_read((integer)strtok(' '))
+					'id' => (integer) strtok(' '),
+					'body' => $this->_read((integer) strtok(' '))
 				);
 			case 'NOT_FOUND':
 			default:
@@ -514,7 +513,7 @@ class Socket_Beanstalk {
 
 		switch ($status) {
 			case 'KICKED':
-				return (integer)strtok(' ');
+				return (integer) strtok(' ');
 			default:
 				$this->_error($status);
 				return false;
@@ -614,7 +613,7 @@ class Socket_Beanstalk {
 
 		switch ($status) {
 			case 'OK':
-				$data = $this->_read((integer)strtok(' '));
+				$data = $this->_read((integer) strtok(' '));
 				return $decode ? $this->_decode($data) : $data;
 			default:
 				$this->_error($status);
